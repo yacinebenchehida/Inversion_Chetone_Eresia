@@ -1,0 +1,470 @@
+ 628  history
+  629  ls
+  630  WDi
+  631  ls
+  632  cd Bioinformatics/
+  633  ls
+  634  cd 7_genome_annotation/
+  635  ls
+  636  cd GeMoMa/
+  637  ls
+  638  cd Scripts/
+  639  ls
+  640  tail -f slurm-22510275.out 
+  641  sbatch ./run_gemoma.sh Arctia_plantaginis
+  642  sq
+  643  ls
+  644  rm slurm-22510265.out
+  645  cat slurm-22512757.out
+  646  sq
+  647  ls
+  648   java_gemoma="/mnt/scratch/projects/biol-specgen-2018/yacine/Tools/gemoma/share/gemoma-1.9-0/GeMoMa-1.9.jar"
+  649  sq
+  650  scancel 22512757
+  651  ls
+  652  rm slurm-22512757.out
+  653  sq
+  654  ls
+  655  cat sq
+  656  sq
+  657  ls
+  658  ll
+  659  rm GeMoMa_temp
+  660  rm -r GeMoMa_temp
+  661  ls
+  662  sjava_gemoma="/mnt/scratch/projects/biol-specgen-2018/yacine/Tools/gemoma/share/gemoma-1.9-0/GeMoMa-1.9.jar"
+  663      java -Xmx50G -jar $java_gemoma CLI
+  664  java -Xmx50G -jar $java_gemoma CLI
+  665  java_gemoma="/mnt/scratch/projects/biol-specgen-2018/yacine/Tools/gemoma/share/gemoma-1.9-0/GeMoMa-1.9.jar"
+  666  java -Xmx50G -jar $java_gemoma CLI
+  667  ls
+  668  history
+  669  sbatch ./run_gemoma.sh Arctia_plantaginis
+  670  sq
+  671  ls
+  672  sq
+  673  java -Xmx50G -jar $java_gemoma CLI GeMoMa
+  674  java -Xmx50G -jar $java_gemoma CLI GeMoMa|grep rf
+  675  java -Xmx50G -jar $java_gemoma CLI GeMoMaPipeline
+  676  sq
+  677  ls
+  678  wc -l slurm-22513009.out
+  679  sq
+  680  wc -l slurm-22513009.out
+  681  watch -n 120 wc -l slurm-22513009.out
+  682  for i in {1..1000}; do  wc -l slurm-22513009.out; sleep 1m; done
+  683  sq
+  684  for i in {1..1000}; do  wc -l slurm-22513009.out; sleep 1m; done
+  685  sq
+  686  ls
+  687  cd ..
+  688  ls
+  689  cd ..
+  690  ls
+  691  cd ..
+  692  ls
+  693  cd ..
+  694  ls
+  695  mkdir Inversions
+  696  cd Inversions/
+  697  ls
+  698  git clone https://github.com/yacinebenchehida/Inversion_Chetone_Eresia.git
+  699  ls
+  700  cd Inversion_Chetone_Eresia/
+  701  ls
+  702  cd ..
+  703  ls
+  704  cd ..
+  705  ls
+  706  cd Bioinformatics/
+  707  ls
+  708  cd 7_genome_annotation/GeMoMa/
+  709  ls
+  710  cd Scripts/
+  711  ls
+  712  cp GeMoMa.smk run_gemoma.sh star.smk ../../../../Inversions/
+  713  cd ../../../../Inversions/
+  714  ls
+  715  mkdir Github
+  716  mv Inversion_Chetone_Eresia/ Github/
+  717  ls
+  718  mv *smk *sh Github/Inversion_Chetone_Eresia/
+  719  cd Github/Inversion_Chetone_Eresia/
+  720  ls
+  721  cat GeMoMa.smk 
+  722  ls
+  723  rm GeMoMa.smk
+  724  ls
+  725  git add .
+  726  git commit -m "first commit”
+  727  git commit -m "first commit"
+  728  git push
+  729  ls
+  730  mkdir GeMoMa
+  731  mv *sh *mk GeMoMa/
+  732  ls
+  733  cd ..
+  734  ls
+  735  git add .
+  736  cd Inversion_Chetone_Eresia/
+  737  ls
+  738  git add .
+  739  git commit -m "Create GeMoMa folder"
+  740  git push
+  741  ls
+  742  mkdir Star
+  743  mkdir SnpEff
+  744  ls
+  745  rm -r Star/
+  746  ls
+  747  cd ..
+  748  ls
+  749  cd Inversion_Chetone_Eresia/
+  750  ls
+  751  mv GeMoMa/ SnpEff/
+  752  ls
+  753  cd SnpEff/
+  754  ls
+  755  mv * ../
+  756  cd ..
+  757  ls
+  758  cd ..
+  759  ls
+  760  cd Inversion_Chetone_Eresia/
+  761  ls
+  762  mkdir Genome_scans
+  763  ls
+  764  cd ..
+  765  ls
+  766  mkdir Gene_chetone_inversion
+  767  mv *sh *py Gene_chetone_inversion/
+  768  mv Gene_chetone_inversion/ Inversion_Chetone_Eresia/
+  769  ls
+  770  cd Inversion_Chetone_Eresia/
+  771  ls
+  772  cd ..
+  773  ls
+  774  mkdir Sliding_windows_PCA
+  775  mv *sh *R *sh Sliding_windows_PCA/
+  776  ls
+  777  mv scaffold_size.py  Sliding_windows_PCA/
+  778  ls
+  779  mv Sliding_windows_PCA/ Inversion_Chetone_Eresia/
+  780  ls
+  781  cd Inversion_Chetone_Eresia/
+  782  ls
+  783  history
+  784  sq
+  785  git add .
+  786  git commit -m "Create folder with first results"
+  787  git push
+  788  sq
+  789  ls
+  790  pwd
+  791  cd ..
+  792  ls
+  793  cd ..
+  794  ls
+  795  cd ..
+  796  ls
+  797  cd Conv_Evol/cd
+  798  cd ..
+  799  ls
+  800  cd yacine/Bioinformatics/7_genome_annotation/GeMoMa/Scripts/
+  801  ls
+  802  history
+  803  for i in {1..1000}; do  wc -l slurm-22513009.out; sleep 1m; done
+  804  sq
+  805  for i in {1..1000}; do  wc -l slurm-22513009.out; sleep 1m; done
+  806  ls
+  807  tail -n 100 slurm-22506980.out
+  808  tail -n 300 slurm-22506980.out
+  809  ls
+  810  grep rna-APLA_LOCUS9843 slurm-22506980.out
+  811  grep rna-APLA_LOCUS9843 slurm-22513009.out 
+  812  for i in {1..1000}; do  wc -l slurm-22513009.out; sleep 1m; done
+  813  grep rna-APLA_LOCUS9843 slurm-22513009.out 
+  814  sq
+  815  ls
+  816  cat slurm-22513009.out
+  817  ll
+  818  cat final_annotation.gff |grep -P  "gene\t"|grep ctg001860|awk '$4 > 9850688'| awk '$4 < 10873586'|awk '{print $5-$4}'
+  819  cat final_annotation.gff |grep -P  "gene\t"|grep ctg001860|awk '$4 > 9850688'| awk '$4 < 10873586'|awk '{print $5-$4}'|wc -l
+  820  history
+  821  history|grep slurm
+  822  history|grep sbatch
+  823  sbatch ./run_gemoma.sh Arctia_plantaginis Heliconius_melpomene
+  824  sq
+  825  ls
+  826  mv filtered_predictions.gff Actia_filtered_predictions.gff
+  827  ls
+  828  rm filtered_predictions_1.gff
+  829  filtered_predictions_1.gff
+  830  ls
+  831  grep gene_11787 final_annotation_1.gff
+  832  grep gene_11787 final_annotation.gff
+  833  grep gene_11787 Actia_filtered_predictions.gff
+  834  head final_annotation.gff
+  835  less final_annotation.gff
+  836  ls
+  837  module spider gffread
+  838  module spider gffread/0.12.7-GCCcore-11.2.0
+  839  history|grep gffread
+  840  module spider biopython
+  841  module load Biopython/1.84-foss-2024a
+  842  python3
+  843  pip install bcbio-gff
+  844  Ask ChatGPT
+  845  python3
+  846  ls
+  847  gffread final_annotation.gff  -g /mnt/scratch/projects/biol-specgen-2018/yacine/Bioinformatics/0_Data/reference_genomes/Chetone_histrio/chetone_histrio_mtDNA_05_02_23.fasta  -x cds_gemoma.fasta
+  848  module load gffread/0.12.7-GCCcore-11.2.0
+  849  gffread final_annotation.gff  -g /mnt/scratch/projects/biol-specgen-2018/yacine/Bioinformatics/0_Data/reference_genomes/Chetone_histrio/chetone_histrio_mtDNA_05_02_23.fasta  -x cds_gemoma.fasta
+  850  ls
+  851  nano extract_cds_region.py
+  852  ls
+  853  chmod u+x *
+  854  python3 ./extract_cds_region.py --gff path/to/your.gff3   --fasta path/to/genome.fasta   --contig ctg001860   --start 9850688   --end 10873586 \
+  855  python3 ./extract_cds_region.py --gff final_annotation.gff   --fasta /mnt/scratch/projects/biol-specgen-2018/yacine/Bioinformatics/0_Data/reference_genomes/Chetone_histrio/chetone_histrio_mtDNA_05_02_23.fasta   --contig ctg001860   --start 9850688   --end 10873586 --outdir cds_region_fast
+  856  python3 ./extract_cds_region.py --gff final_annotation.gff   --fasta /mnt/scratch/projects/biol-specgen-2018/yacine/Bioinformatics/0_Data/reference_genomes/Chetone_histrio/chetone_histrio_mtDNA_05_02_23.fasta   --contig ctg001860_1_np1212   --start 9850688   --end 10873586 --outdir cds_region_fast
+  857  ls
+  858  cd cds_region_fast
+  859  ls
+  860  cd ..
+  861  ls
+  862  python3 ./extract_cds_region.py --gff final_annotation.gff   --fasta /mnt/scratch/projects/biol-specgen-2018/yacine/Bioinformatics/0_Data/reference_genomes/Chetone_histrio/chetone_histrio_mtDNA_05_02_23.fasta   --contig ctg001860_1_np1212   --start 9850688   --end 10873586 --outdir cds_region_fast
+  863  ls
+  864  cd cds_region_fast
+  865  ll
+  866  rm *fa
+  867  cd ..
+  868  ls
+  869  python3 ./extract_cds_region.py --gff final_annotation.gff   --fasta /mnt/scratch/projects/biol-specgen-2018/yacine/Bioinformatics/0_Data/reference_genomes/Chetone_histrio/chetone_histrio_mtDNA_05_02_23.fasta   --contig ctg001860_1_np1212   --start 9850688   --end 10873586 --outdir cds_region_fast
+  870  cd cds_region_fast
+  871  ls
+  872  ll
+  873  ll|awk '{print $9}'
+  874  ll|awk '{print $9}'|sort -V
+  875  ls
+  876  cd ..
+  877  ls
+  878  nano extract_gene_region.py
+  879  python3 ./extract_gene_region.py --gff final_annotation.gff   --fasta /mnt/scratch/projects/biol-specgen-2018/yacine/Bioinformatics/0_Data/reference_genomes/Chetone_histrio/chetone_histrio_mtDNA_05_02_23.fasta   --contig ctg001860_1_np1212   --start 9850688   --end 10873586 --outdir gene_in_inversion_fasta
+  880  ls
+  881  cd gene_in_inversion_fasta
+  882  ls
+  883  history
+  884  ll|awk '{print $9}'|sort -V
+  885  cd ..
+  886  ls
+  887  mv ll
+  888  ll
+  889  mv final_annotation.gff Helico_arctia_final_annotation.gff
+  890  ls
+  891  sq
+  892  ls
+  893  history|grep run
+  894  ls
+  895  ls *gff
+  896  rm final_annotation_1.gff 
+  897  sbatch ./run_gemoma.sh Heliconius_melpomene
+  898  ls
+  899  ll
+  900  ls *gff
+  901  ll
+  902  cd GeMoMa_temp
+  903  ls
+  904  cd ..
+  905  ls
+  906  rm -r GeMoMa_temp
+  907  cat slurm-22519866.out
+  908  ls
+  909  history
+  910  ./run_gemoma.sh Heliconius_melpomene
+  911  ls
+  912  mv final_annotation_2.gff heliconius_final_annotation.gff
+  913  ls
+  914  history 
+  915  heliconius_final_annotation.gff
+  916  python3 ./extract_cds_region.py --gff heliconius_final_annotation.gff   --fasta /mnt/scratch/projects/biol-specgen-2018/yacine/Bioinformatics/0_Data/reference_genomes/Chetone_histrio/chetone_histrio_mtDNA_05_02_23.fasta   --contig ctg001860_1_np1212   --start 9850688   --end 10873586 --outdir Heliconius_cds_fasta
+  917  cd Heliconius_cds_fasta
+  918  ls
+  919   ll|awk '{print $9}'|sort -V
+  920  ls
+  921  cd ..
+  922  ls
+  923  rm -r GeMoMa_temp 
+  924  ls
+  925  rm -r prot* slurm*
+  926  ls
+  927  rm -r *gff intron* *fasta coverage*
+  928  ls
+  929  rm -r cds_region_fast
+  930  CD ¨¨
+  931  cd ..
+  932  ls
+  933  cd Inputs/
+  934  ls
+  935  less /mnt/scratch/projects/biol-specgen-2018/yacine/Pheromones/Blast/Inputs/Bombyx_mori/Bombyx_mori_genome.fa
+  936  less /mnt/scratch/projects/biol-specgen-2018/yacine/Pheromones/Blast/Inputs/Bombyx_mori/Bombyx_mori.gff3
+  937  head /mnt/scratch/projects/biol-specgen-2018/yacine/Pheromones/Blast/Inputs/Danaus_plexippus/Danaus_plexippus_genome.fa
+  938  head /mnt/scratch/projects/biol-specgen-2018/yacine/Bioinformatics/7_genome_annotation/GeMoMa/Inputs/Danaus_plexippus_DanPle_1.0.gff3
+  939  tail -f /mnt/scratch/projects/biol-specgen-2018/yacine/Bioinformatics/7_genome_annotation/GeMoMa/Inputs/Danaus_plexippus_DanPle_1.0.gff3
+  940  less /mnt/scratch/projects/biol-specgen-2018/yacine/Bioinformatics/7_genome_annotation/GeMoMa/Inputs/Danaus_plexippus_DanPle_1.0.gff3
+  941  history|grep dataset
+  942  ls
+  943  /mnt/scratch/projects/biol-specgen-2018/yacine/Tools/datasets download genome accession ASM3026992v2 --include gff3,genome
+  944  /mnt/scratch/projects/biol-specgen-2018/yacine/Tools/datasets download genome accession GCF_030269925.1 --include gff3,genome
+  945  ls
+  946  unzip ncbi_dataset.zip 
+  947  ls
+  948  cd cd ncbi_dataset/
+  949  ls
+  950  cd ncbi_dataset/
+  951  ls
+  952  cd data/GCF_030269925.1/
+  953  ls
+  954  mv * ../../..
+  955  cd ../../..
+  956  ls
+  957  rm -r ncbi_dataset ncbi_dataset.zip
+  958  ls
+  959  rm -r *ncbi_dataset*
+  960  ls
+  961  mv genomic.gff Bombyx_mori.gff3
+  962  mv GCF_030269925.1_ASM3026992v2_genomic.fna Bombyx_mori.fa
+  963  ls
+  964  rm md5sum.txt 
+  965  rm README.md 
+  966  ls
+  967  readlink -f Bombyx_mori.fa
+  968  readlink -f references.tsv
+  969  readlink -f Bombyx_mori.gff3
+  970  ls
+  971  cd ..
+  972  ls
+  973  cd Scripts/
+  974  ls
+  975  nano star.smk 
+  976  sq
+  977  ls
+  978  cd ../Results/
+  979  ls
+  980  cd GeMoMa
+  981  ls
+  982  rm -r Arctia_plantaginis  Chetone_histrio  Heliconius_melpomene
+  983  cd QUERY
+  984  ls
+  985  cd ..
+  986  rm -r QUERY
+  987  cd ..
+  988  ls
+  989  cd ..
+  990  ls
+  991  cd Scripts/
+  992  ls
+  993  cd ..
+  994  ls
+  995  cd Scripts/
+  996  ls
+  997  sbatch ./run_gemoma.sh 
+  998  sq
+  999  ls
+ 1000  tail -f slurm-22520692.out 
+ 1001  ls
+ 1002  cd Bioinformatics/7_genome_annotation/GeMoMa/
+ 1003  ls
+ 1004  cd Scripts/
+ 1005  ls
+ 1006  cd Heliconius_melpomene_evidence_inferred_cds_sequences/
+ 1007  ls
+ 1008  ll|awk '{print $9}'|sort -V|xargs cat
+ 1009  ll|awk '{print $9}'|sort -V|xargs cat > cds_inversion_based_on_melpo.fasta
+ 1010  ls
+ 1011  head cds_inversion_based_on_melpo.fasta
+ 1012  rm -r cds_inversion_based_on_melpo.fasta
+ 1013  (ll|awk '{print $9}'|sort -V|xargs cat )
+ 1014  nano  cds_inversion_based_on_melpo.fasta
+ 1015  ls
+ 1016  cat cds_inversion_based_on_melpo.fasta 
+ 1017  history
+ 1018  ls
+ 1019  cat *ctg001860_1_np1212:10762058-10765858*
+ 1020  cat *ctg001860_1_np1212_10762058-10765858*
+ 1021  cd ..
+ 1022  ls
+ 1023  cd Arctia_plantaginis_evidence_inferred_
+ 1024  sq
+ 1025  cd Arctia_plantaginis_evidence_inferred_cds_sequences/
+ 1026  ls
+ 1027  ll|awk '{print $9}'|sort -V|xargs cat
+ 1028  nano cds_inversion_based_on_arctia.fasta
+ 1029  ls
+ 1030  cat cds_inversion_based_on_arctia.fasta 
+ 1031  ls
+ 1032  cd ..
+ 1033  ls
+ 1034  cd annotations/
+ 1035  ls
+ 1036  cd ..
+ 1037  ls
+ 1038  cp filtered_predictions_Heliconius_melpomene.gff annotations/
+ 1039  ls
+ 1040  cd annotations/
+ 1041  ls
+ 1042  gffread annotations.gff -g genome.fasta -w transcripts.fasta
+ 1043  Ask ChatGPT
+ 1044  module spider gffread
+ 1045  module load gffread/0.12.7-GCCcore-11.2.0
+ 1046  gffread annotations.gff -g ../../Inputs/Masked_chetone_histrio_mtDNA_05_02_23.fasta -w transcripts_Chetone_based_on_Arctia.fasta
+ 1047  gffread filtered_predictions_Arctia_plantaginis.gff -g ../../Inputs/Masked_chetone_histrio_mtDNA_05_02_23.fasta -w transcripts_Chetone_based_on_Arctia.fasta
+ 1048  ls
+ 1049  less transcripts_Chetone_based_on_Arctia.fasta 
+ 1050  history|grep makeblastdb
+ 1051  makeblastdb -in transcripts_Chetone_based_on_Arctia.fasta -dbtype nucl -input_type fasta -out transcriptom_chetone_based_on_arctia -title transcriptom_chetone_based_on_arctia
+ 1052  module spider blast+
+ 1053  module load BLAST+/2.14.1-gompi-2023a
+ 1054  makeblastdb -in transcripts_Chetone_based_on_Arctia.fasta -dbtype nucl -input_type fasta -out transcriptom_chetone_based_on_arctia -title transcriptom_chetone_based_on_arctia
+ 1055  ls
+ 1056  blastp -query /mnt/scratch/projects/biol-specgen-2018/yacine/Conv_Evol/SnpEff/Results/melpomene_proteins_sequences.fasta -db transcriptom_chetone_based_on_arctia -outfmt 6 -max_target_seqs 1 -max_hsps 1
+ 1057  blastp -query /mnt/scratch/projects/biol-specgen-2018/yacine/Conv_Evol/SnpEff/Inputs/melpomene_proteins_sequences.fasta -db transcriptom_chetone_based_on_arctia -outfmt 6 -max_target_seqs 1 -max_hsps 1
+ 1058  tblastn -query /mnt/scratch/projects/biol-specgen-2018/yacine/Conv_Evol/SnpEff/Inputs/melpomene_proteins_sequences.fasta -db transcriptom_chetone_based_on_arctia -outfmt 6 -max_target_seqs 1 -max_hsps 1
+ 1059  ls
+ 1060  head filtered_predictions_Arctia_plantaginis.gff
+ 1061  grep Arctia_plantaginis_rna-APLA_LOCUS1556_R0 filtered_predictions_Arctia_plantaginis.gff 
+ 1062  ls
+ 1063  nano barnousse_folatre
+ 1064  cat barnousse_folatre |awk '{print $1}'
+ 1065  paste <(cat barnousse_folatre |awk '{print $1}') <(cat barnousse_folatre |awk '{print $2}'|while read line; do grep $line filtered_predictions_Arctia_plantaginis.gff |awk '{print $1}'; done)
+ 1066  paste <(cat barnousse_folatre |awk '{print $1}') <(cat barnousse_folatre |awk '{print $2}'|while read line; do grep $line filtered_predictions_Arctia_plantaginis.gff |awk 'NR==1 {print $1}'; done)
+ 1067  paste <(cat barnousse_folatre |awk '{print $1}') <(cat barnousse_folatre |awk '{print $2}'|while read line; do grep $line filtered_predictions_Arctia_plantaginis.gff |awk 'NR==1 {print $1"\t"$2}'; done)
+ 1068  paste <(cat barnousse_folatre |awk '{print $1}') <(cat barnousse_folatre |awk '{print $2}'|while read line; do grep $line filtered_predictions_Arctia_plantaginis.gff |awk 'NR==1 {print $1"\t"$3}'; done)
+ 1069  paste <(cat barnousse_folatre |awk '{print $1}') <(cat barnousse_folatre |awk '{print $2}'|while read line; do grep $line filtered_predictions_Arctia_plantaginis.gff |awk 'NR==1 {print $1"\t"$4}'; done)
+ 1070  history
+ 1071  gffread annotations.gff -g genome.fasta -y proteins.fasta
+ 1072  gffread filtered_predictions_Arctia_plantaginis.gff -g ../../Inputs/Masked_chetone_histrio_mtDNA_05_02_23.fasta -y protein_Chetone_based_on_Arctia.fasta
+ 1073  ls
+ 1074  head transcripts_Chetone_based_on_Arctia.fasta
+ 1075  ls
+ 1076  head protein_Chetone_based_on_Arctia.fasta 
+ 1077  ls
+ 1078  makeblastdb -in protein_Chetone_based_on_Arctia.fasta -dbtype prot -input_type fasta -out proteom_chetone_based_on_arctia -title proteom_chetone_based_on_arctia
+ 1079  blastp -query /mnt/scratch/projects/biol-specgen-2018/yacine/Conv_Evol/SnpEff/Inputs/melpomene_proteins_sequences.fasta -db proteom_chetone_based_on_arctia -outfmt 6 -max_target_seqs 1 -max_hsps 1
+ 1080  grep Arctia_plantaginis_rna-APLA_LOCUS1563_R0 protein_Chetone_based_on_Arctia.fasta 
+ 1081  sq
+ 1082  ls
+ 1083  nano align_similar_genes.py
+ 1084  module spider muscle
+ 1085  module spider maff
+ 1086  module load MUSCLE/3.8.1551-GCC-9.3.0; module load MAFFT/7.520-GCC-12.3.0-with-extensions
+ 1087  ls
+ 1088  nano barnousse_proteique
+ 1089  cat barnousse_proteique |awk '{print $1"\t"$2}'
+ 1090  ls
+ 1091  python3 ./align_similar_genes.py 
+ 1092  python3 ./align_similar_genes.py --table barnousse_proteique --query_fasta /mnt/scratch/projects/biol-specgen-2018/yacine/Conv_Evol/SnpEff/Results/melpomene_proteins_sequences.fasta --target_fasta protein_Chetone_based_on_Arctia.fasta --outdir ./ --aligner muscle
+ 1093  python3 ./align_similar_genes.py --table barnousse_proteique --query_fasta /mnt/scratch/projects/biol-specgen-2018/yacine/Conv_Evol/SnpEff/Inputs/melpomene_proteins_sequences.fasta --target_fasta protein_Chetone_based_on_Arctia.fasta --outdir ./ --aligner muscle
+ 1094  ls
+ 1095  cat HMEL*fasta > combined.fa
+ 1096  ls
+ 1097  history
