@@ -1,7 +1,10 @@
-filter_contigs_by_proportion <- function(blast_dt, contig_col_index = 2, threshold = 0.7) {
+filter_contigs_by_proportion <- function(blast_dt, contig_col_index = 2, bit_score_index = 12, threshold = 0.7, min_bit_score = 80) {
   
   # Ensure input is a data.table
   dt <- as.data.table(blast_dt)
+  
+  # Filter rows with bit score below threshold
+  dt <- dt[dt[[bit_score_index]] >= min_bit_score]
   
   # Count hits per contig
   contig_counts <- dt[, .N, by = dt[[contig_col_index]]]
@@ -21,8 +24,8 @@ filter_contigs_by_proportion <- function(blast_dt, contig_col_index = 2, thresho
                     paste(max_contig, collapse = ", "), max_prop * 100))
     return(NULL)
   }
-  
-  # Filter original table for those contigs
+ 
+   # Filter original table for those contigs
   filtered_dt <- dt[dt[[contig_col_index]] %in% selected_contigs]
   
   # Return filtered table
