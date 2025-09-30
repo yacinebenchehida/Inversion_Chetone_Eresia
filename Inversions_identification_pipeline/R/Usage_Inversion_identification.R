@@ -23,9 +23,10 @@ source("wrapper_detect_inversions.R")
 #direction <- assess_direction(filtered_dt)
 #whatever <- wrapper_detect_inversions(filtered_dt, min_consecutive=3, plot_window=FALSE, boundary_genes = c("HMEL000058-RA","HMEL000026-RA"))
 
-inversion_results <- lapply(gca_files, function(file) { # use future_lapply for parallelisation but speed gain only huge data otherwise even slower due to overhead.
+inversion_results <- lapply(seq_along(gca_files), function(i) { # use future_lapply for parallelisation but speed gain only huge data otherwise even slower due to overhead.
+  file <- gca_files[i]
   gca_name <- tools::file_path_sans_ext(basename(file))
-  message(sprintf("Processing %s...", gca_name))
+  message(sprintf("[%d/%d] Processing %s...", i, length(gca_files), gca_name))
   dt <- fread(file, header = FALSE)
   result <- tryCatch({
     suppressMessages(suppressWarnings({
