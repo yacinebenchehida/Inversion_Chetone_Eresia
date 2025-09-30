@@ -26,7 +26,7 @@ filter_contigs_by_proportion <- function(blast_dt, contig_col_index = 2, pos_col
     max_contig <- contig_counts[proportion == max_prop, contig]
     message(sprintf("No contigs have frequency above the indicated threshold. Most abundant contig(s): %s with proportion %.1f%%", 
                     paste(max_contig, collapse = ", "), max_prop * 100))
-    return(NULL)
+    stop("Please decrease threshold")
   }
   
   # Filter original table for those contigs
@@ -35,3 +35,4 @@ filter_contigs_by_proportion <- function(blast_dt, contig_col_index = 2, pos_col
   # Return filtered table
   return(filtered_dt)
 }
+ 
