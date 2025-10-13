@@ -67,4 +67,36 @@ all_inversions <- rbindlist(
 )
 
 # Check how many species have inversions
-length(inversion_results)
+# inversion_results
+
+
+# Convert to a single data.frame with GCA column first
+inversion_results_df <- rbindlist(
+  lapply(inversion_results, function(x) {
+    df <- x$data
+    df[, GCA := x$name]   # add GCA column
+    setcolorder(df, c("GCA", setdiff(names(df), "GCA"))) # GCA as first col
+    return(df)
+  }),
+  fill = TRUE
+)
+
+inversion_results_df$unique_breakpoints <- paste(inversion_results_df$gene_name,inversion_results_df$role,sep="_")
+
+# Convert table to data frame
+df <- as.data.frame(table(inversion_results_df$unique_breakpoints))
+colnames(df) <- c("Entry", "Frequency")
+df$Entry <- factor(df$Entry, levels = df$Entry)
+df[df$Frequency > 0,]
+
+# Dot plot with labels on the left
+pdf("brekapoint_frequencies.pdf")
+ggplot(df, aes(x = Frequency, y = Entry)) +
+  geom_point(size = 1.5, color = "red") +
+  geom_segment(aes(x = 0, xend = Frequency, y = Entry, yend = Entry),
+               color = "red", linetype = "dashed") +
+  theme_minimal() +
+  labs(title = "Frequencies of entries",
+       x = "Count", y = "Entry") +
+  theme(axis.text.y = element_text(size =8))
+dev.off()
