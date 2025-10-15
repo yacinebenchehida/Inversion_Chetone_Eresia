@@ -5,7 +5,7 @@ wrapper_detect_inversions <- function(dt, pos_col_index = 9, gene_col_index = 1,
   orig_genes <- as.character(dt[[gene_col_index]])  # Store original gene names
   dt[[gene_col_index]] <- orig_genes  # Keep original names
   
-  direction <- assess_direction(dt, pos_col_index = pos_col_index)  # Determine direction on full dataset
+  direction <- assess_direction(dt, pos_col_index = pos_col_index, keep_global = TRUE)  # Determine direction on full dataset
   if (direction == "non-monotonous") {  # Check if direction is valid
     message("Full data non-monotonous. No inversion detection performed.")  
     return(NULL)  # Exit if non-monotonous
@@ -28,6 +28,17 @@ wrapper_detect_inversions <- function(dt, pos_col_index = 9, gene_col_index = 1,
     min_consecutive = min_consecutive,
     direction = direction
   )
+  
+  if (!is.null(results_inversion_table) && nrow(results_inversion_table) > 0) {
+    results_inversion_table[, type := {
+      start_gene <- gene_name[role == "start"]
+      inv_start_pos <- count_dt[[pos_col_index]][match(start_gene, count_dt[[gene_col_index]])]
+      first3_positions <- head(count_dt[[pos_col_index]], 3)
+      last3_positions <- tail(count_dt[[pos_col_index]], 3)
+      translocated <- is_translocated_inversion(direction, inv_start_pos, first3_positions, last3_positions)
+      if (translocated) "inversion+translocation" else "simple inversion"
+    }, by = inversion_id]
+  }
   
   if (plot_window) {  # Plot only if requested
     library(ggplot2)  # Load ggplot2
@@ -53,5 +64,13 @@ wrapper_detect_inversions <- function(dt, pos_col_index = 9, gene_col_index = 1,
     print(p)  # Display plot
   }
   
-  return(results_inversion_table)  # Return inversion table
-} # End of detect_inversions wrapper
+  if (nrow(results_inversion_table) == 0) {
+    message("There are no inversion in the specified window")
+    return(NULL)
+  } else {
+    inv_numb <- nrow(results_inversion_table)/2
+    message(paste("Youhouuuu! There are ",inv_numb," inversion(s) in the specified window"))
+    return(results_inversion_table)  # Return inversion table
+  }
+  
+} 
