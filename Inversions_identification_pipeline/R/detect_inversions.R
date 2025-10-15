@@ -1,65 +1,61 @@
-wrapper_detect_inversions <- function(dt, pos_col_index = 9, gene_col_index = 1,
-                                      min_consecutive = 3, boundary_genes = NULL,
-                                      plot_window = FALSE) {
-  dt <- data.table::as.data.table(dt)  # Convert input to data.table
-  orig_genes <- as.character(dt[[gene_col_index]])  # Store original gene names
-  dt[[gene_col_index]] <- orig_genes  # Keep original names
+detect_inversions <- function(dt_segment, pos_col_index = 9, gene_col_index = 1, min_consecutive = 3, direction = "positive") {
+  dt_segment <- as.data.table(dt_segment)  # Ensure input is a data.table
+  orig_genes <- as.character(dt_segment[[gene_col_index]])  # Store original gene names
+  dt_segment[[gene_col_index]] <- orig_genes  # Keep original gene names
   
-  direction <- assess_direction(dt, pos_col_index = pos_col_index)  # Determine direction on full dataset
-  if (direction == "non-monotonous") {  # Check if direction is valid
-    message("Full data non-monotonous. No inversion detection performed.")  
-    return(NULL)  # Exit if non-monotonous
-  }
+  positions <- dt_segment[[pos_col_index]]  # Extract positions
+  expected_sign <- if (direction == "positive") 1 else -1  # Determine expected direction
+  adj_diff <- diff(positions)  # Compute differences between consecutive positions
+  reverse_steps <- sign(adj_diff) != expected_sign  # Identify steps opposite to expected direction
   
-  count_dt <- dt  # Copy full dataset for counting inversions
-  if (!is.null(boundary_genes)) {  # If boundaries provided
-    if (length(boundary_genes) != 2) stop("boundary_genes must contain exactly two gene names.")  # Enforce 2 genes
-    positions_idxs <- which(orig_genes %in% boundary_genes)  # Find indices of boundary genes
-    if (length(positions_idxs) != 2) stop("One or both boundary genes not found in the data.")  # Validate presence
-    start_idx <- min(positions_idxs)  # Determine left boundary
-    end_idx <- max(positions_idxs)  # Determine right boundary
-    count_dt <- dt[start_idx:end_idx, ]  # Subset data for counting inversions
-  }
+  results_inversion_table <- data.table(inversion_id = integer(), gene_name = character(), role = character())  # Initialize results table
+  run_start <- NULL  # Initialize start index for current run
+  run_length <- 0  # Initialize run length counter
+  inversion_id <- 1  # Initialize inversion counter
   
-  results_inversion_table <- detect_inversions(  # Call simple inversion function
-    dt_segment = count_dt,
-    pos_col_index = pos_col_index,
-    gene_col_index = gene_col_index,
-    min_consecutive = min_consecutive,
-    direction = direction
-  )
-  
-  if (plot_window) {  # Plot only if requested
-    library(ggplot2)  # Load ggplot2
-    plot_dt <- dt  # Use full dataset for plotting
-    plot_dt[[gene_col_index]] <- factor(plot_dt[[gene_col_index]], levels = plot_dt[[gene_col_index]])  # Preserve gene order
-    
-    xmin_val <- -Inf  # Default left boundary for plot
-    xmax_val <- Inf  # Default right boundary for plot
-    if (!is.null(boundary_genes)) {  # Adjust if boundaries provided
-      xmin_val <- which(plot_dt[[gene_col_index]] == boundary_genes[1])  # Left boundary
-      xmax_val <- which(plot_dt[[gene_col_index]] == boundary_genes[2])  # Right boundary
+  for (i in seq_along(reverse_steps)) {  # Loop over reverse steps
+    if (reverse_steps[i]) {  # If step is reversed
+      if (is.null(run_start)) run_start <- i  # Start new run if none active
+      run_length <- run_length + 1  # Increment run length
+    } else {  # If step returns to expected direction
+      if (!is.null(run_start) && run_length >= min_consecutive) {  # Check if run qualifies as inversion
+        # Adjust start index using i-1 and i+2 rule
+        prev_pos <- ifelse(run_start > 1, positions[run_start - 1], positions[run_start])
+        next_pos <- ifelse(run_start + 2 <= length(positions), positions[run_start + 2], positions[run_start + 1])
+        inversion_start_idx <- ifelse(next_pos > prev_pos, run_start, run_start + 1)
+        inversion_end_idx <- run_start + run_length  # End index of inversion
+        
+        results_inversion_table <- rbind(results_inversion_table,  # Append inversion
+                                         data.table(
+                                           inversion_id = inversion_id,
+                                           gene_name = c(dt_segment[[gene_col_index]][inversion_start_idx],
+                                                         dt_segment[[gene_col_index]][inversion_end_idx]),
+                                           role = c("start", "end")
+                                         ),
+                                         use.names = TRUE)
+        inversion_id <- inversion_id + 1  # Increment inversion counter
+      }
+      run_start <- NULL  # Reset run
+      run_length <- 0  # Reset length
     }
-    
-    p <- ggplot(data = plot_dt, aes_string(x = names(plot_dt)[gene_col_index], y = names(plot_dt)[pos_col_index])) +  # Map x and y
-      theme_bw() +  # Clean theme
-      geom_point() +  # Scatter plot
-      ggtitle("Species") +  # Plot title
-      {if(!is.null(boundary_genes)) annotate("rect", xmin = xmin_val, xmax = xmax_val, ymin = -Inf, ymax = Inf, alpha = 0.3, fill = "red")} +  # Highlight region
-      theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1, size = 5)) +  # Rotate x labels
-      xlab("gene order") +  # X axis label
-      ylab("Gene start position")  # Y axis label
-    
-    print(p)  # Display plot
   }
   
-  if (nrow(results_inversion_table) == 0) {
-    message("There are no inversion in the specified window")
-    return(NULL)
-  } else {
-    inv_numb <- nrow(results_inversion_table)/2
-    message(paste("Youhouuuu! There are ",inv_numb," inversion(s) in the specified window"))
-    return(results_inversion_table)  # Return inversion table
+  # Final check if last run reaches end
+  if (!is.null(run_start) && run_length >= min_consecutive) {
+    prev_pos <- ifelse(run_start > 1, positions[run_start - 1], positions[run_start])
+    next_pos <- ifelse(run_start + 2 <= length(positions), positions[run_start + 2], positions[run_start + 1])
+    inversion_start_idx <- ifelse(next_pos > prev_pos, run_start, run_start + 1)
+    inversion_end_idx <- run_start + run_length
+    
+    results_inversion_table <- rbind(results_inversion_table,
+                                     data.table(
+                                       inversion_id = inversion_id,
+                                       gene_name = c(dt_segment[[gene_col_index]][inversion_start_idx],
+                                                     dt_segment[[gene_col_index]][inversion_end_idx]),
+                                       role = c("start", "end")
+                                     ),
+                                     use.names = TRUE)
   }
   
+  return(results_inversion_table)  # Return final inversion table
 }
