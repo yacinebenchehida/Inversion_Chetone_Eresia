@@ -1,5 +1,5 @@
 filter_contigs_by_proportion <- function(blast_dt, contig_col_index = 2, pos_col_index = 9,
-                                         bit_score_index = 12, threshold = 0.7, min_bit_score = 80) {
+                                         bit_score_index = 12, threshold = 0.7, min_bit_score = 80, outlier = TRUE) {
   
   # Ensure input is a data.table
   dt <- as.data.table(blast_dt)
@@ -7,12 +7,21 @@ filter_contigs_by_proportion <- function(blast_dt, contig_col_index = 2, pos_col
   # Filter rows with bit score below threshold
   dt <- dt[dt[[bit_score_index]] >= min_bit_score]
   
+  # Remove outliers if requested
+  if (outlier) {
+    mean_pos <- mean(dt[[pos_col_index]], na.rm = TRUE)   # compute mean of positions
+    sd_pos <- sd(dt[[pos_col_index]], na.rm = TRUE)       # compute standard deviation of positions
+    lower_margin <- mean_pos -   sd_pos
+    upper_margin <- mean_pos +   sd_pos
+    dt <- dt[dt[[pos_col_index]] >= lower_margin & dt[[pos_col_index]] <= upper_margin]  # keep values within bounds
+  }
+  
   # Handle duplicate positions: keep the row with highest bit score
   dt <- dt[!duplicated(dt[[pos_col_index]]), ]
   
   # Count hits per contig
   contig_counts <- dt[, .N, by = dt[[contig_col_index]]]
-  setnames(contig_counts, "dt", "contig")                     # rename for clarity
+  setnames(contig_counts, "dt", "contig")                     
   
   # Compute proportion of total queries
   contig_counts[, proportion := N / sum(N)]
@@ -35,4 +44,3 @@ filter_contigs_by_proportion <- function(blast_dt, contig_col_index = 2, pos_col
   # Return filtered table
   return(filtered_dt)
 }
- 
