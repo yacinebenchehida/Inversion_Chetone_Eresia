@@ -38,6 +38,15 @@ wrapper_detect_inversions <- function(dt, pos_col_index = 9, gene_col_index = 1,
       translocated <- is_translocated_inversion(direction, inv_start_pos, first3_positions, last3_positions)
       if (translocated) "inversion+translocation" else "simple inversion"
     }, by = inversion_id]
+    
+    # Merge oversplit/adjacent inversions (often happens when syntheny is modified within the inversion)
+    results_inversion_table <- merge_oversplit_inversions(                                                         # Call merging function after type set
+      inv_table = results_inversion_table,
+      dt = count_dt,
+      pos_col_index = pos_col_index,
+      gene_col_index = gene_col_index,
+      direction = direction
+    )
   }
   
   if (plot_window) {  # Plot only if requested
@@ -73,4 +82,3 @@ wrapper_detect_inversions <- function(dt, pos_col_index = 9, gene_col_index = 1,
     return(results_inversion_table)  # Return inversion table
   }
   
-} 
