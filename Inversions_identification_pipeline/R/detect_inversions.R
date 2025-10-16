@@ -22,7 +22,11 @@ detect_inversions <- function(dt_segment, pos_col_index = 9, gene_col_index = 1,
         # Adjust start index using i-1 and i+2 rule
         prev_pos <- ifelse(run_start > 1, positions[run_start - 1], positions[run_start])
         next_pos <- ifelse(run_start + 2 <= length(positions), positions[run_start + 2], positions[run_start + 1])
-        inversion_start_idx <- ifelse(next_pos > prev_pos, run_start, run_start + 1)
+        if (direction == "positive") {
+          inversion_start_idx <- ifelse(next_pos > prev_pos, run_start, run_start + 1)
+        } else {
+          inversion_start_idx <- ifelse(next_pos < prev_pos, run_start, run_start + 1)
+        }
         inversion_end_idx <- run_start + run_length  # End index of inversion
         
         results_inversion_table <- rbind(results_inversion_table,  # Append inversion
