@@ -21,7 +21,7 @@ filter_contigs_by_proportion <- function(blast_dt, contig_col_index = 2, pos_col
   
   # Count hits per contig
   contig_counts <- dt[, .N, by = dt[[contig_col_index]]]
-  setnames(contig_counts, "dt", "contig")                     
+  setnames(contig_counts, "dt", "contig")                     # rename for clarity
   
   # Compute proportion of total queries
   contig_counts[, proportion := N / sum(N)]
@@ -35,7 +35,7 @@ filter_contigs_by_proportion <- function(blast_dt, contig_col_index = 2, pos_col
     max_contig <- contig_counts[proportion == max_prop, contig]
     message(sprintf("No contigs have frequency above the indicated threshold. Most abundant contig(s): %s with proportion %.1f%%", 
                     paste(max_contig, collapse = ", "), max_prop * 100))
-    stop("Please decrease threshold")
+    stop("Dropping this genome")
   }
   
   # Filter original table for those contigs
