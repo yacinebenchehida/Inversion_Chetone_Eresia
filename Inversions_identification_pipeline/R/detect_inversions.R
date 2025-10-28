@@ -1,4 +1,9 @@
-detect_inversions <- function(dt_segment, pos_col_index = 9, gene_col_index = 1, min_consecutive = 3, direction = "positive") {
+#------------------------------------------------------------------------------------------
+#-------------------------------------------------------------------------
+# Function to detect inversion based on the direction of successive points
+#-------------------------------------------------------------------------
+detect_inversions <- function(dt_segment, pos_col_index = 9, gene_col_index = 1, min_consecutive = 3, direction) {
+  
   dt_segment <- as.data.table(dt_segment)  # Ensure input is a data.table
   orig_genes <- as.character(dt_segment[[gene_col_index]])  # Store original gene names
   dt_segment[[gene_col_index]] <- orig_genes  # Keep original gene names
@@ -19,24 +24,37 @@ detect_inversions <- function(dt_segment, pos_col_index = 9, gene_col_index = 1,
       run_length <- run_length + 1  # Increment run length
     } else {  # If step returns to expected direction
       if (!is.null(run_start) && run_length >= min_consecutive) {  # Check if run qualifies as inversion
-        # Adjust start index using i-1 and i+2 rule
-        prev_pos <- ifelse(run_start > 1, positions[run_start - 1], positions[run_start])
-        next_pos <- ifelse(run_start + 2 <= length(positions), positions[run_start + 2], positions[run_start + 1])
-        if (direction == "positive") {
-          inversion_start_idx <- ifelse(next_pos > prev_pos, run_start, run_start + 1)
-        } else {
-          inversion_start_idx <- ifelse(next_pos < prev_pos, run_start, run_start + 1)
-        }
-        inversion_end_idx <- run_start + run_length  # End index of inversion
+        inversion_start_idx <- run_start  # Default start index of inversion
+        inversion_end_idx <- run_start + run_length  # Default end index of inversion
         
-        results_inversion_table <- rbind(results_inversion_table,  # Append inversion
-                                         data.table(
-                                           inversion_id = inversion_id,
-                                           gene_name = c(dt_segment[[gene_col_index]][inversion_start_idx],
-                                                         dt_segment[[gene_col_index]][inversion_end_idx]),
-                                           role = c("start", "end")
-                                         ),
-                                         use.names = TRUE)
+        # Determine which side touches edge
+        if (inversion_start_idx == 1) {  # Starts at first row → ignore start, mark end as undefined
+          results_inversion_table <- rbind(results_inversion_table,
+                                           data.table(
+                                             inversion_id = inversion_id,
+                                             gene_name = dt_segment[[gene_col_index]][inversion_end_idx],  # Only end row
+                                             role = "undefined"  # Mark as undefined
+                                           ),
+                                           use.names = TRUE)
+        } else if (inversion_end_idx == nrow(dt_segment)) {  # Ends at last row → ignore end, mark start as undefined
+          results_inversion_table <- rbind(results_inversion_table,
+                                           data.table(
+                                             inversion_id = inversion_id,
+                                             gene_name = dt_segment[[gene_col_index]][inversion_start_idx],  # Only start row
+                                             role = "undefined"  # Mark as undefined
+                                           ),
+                                           use.names = TRUE)
+        } else {  # Normal case, neither side touches edge
+          results_inversion_table <- rbind(results_inversion_table,
+                                           data.table(
+                                             inversion_id = inversion_id,
+                                             gene_name = c(dt_segment[[gene_col_index]][inversion_start_idx],
+                                                           dt_segment[[gene_col_index]][inversion_end_idx]),
+                                             role = c("start", "end")  # Standard roles
+                                           ),
+                                           use.names = TRUE)
+        }
+        
         inversion_id <- inversion_id + 1  # Increment inversion counter
       }
       run_start <- NULL  # Reset run
@@ -46,19 +64,36 @@ detect_inversions <- function(dt_segment, pos_col_index = 9, gene_col_index = 1,
   
   # Final check if last run reaches end
   if (!is.null(run_start) && run_length >= min_consecutive) {
-    prev_pos <- ifelse(run_start > 1, positions[run_start - 1], positions[run_start])
-    next_pos <- ifelse(run_start + 2 <= length(positions), positions[run_start + 2], positions[run_start + 1])
-    inversion_start_idx <- ifelse(next_pos > prev_pos, run_start, run_start + 1)
-    inversion_end_idx <- run_start + run_length
+    inversion_start_idx <- run_start  # Default start index
+    inversion_end_idx <- run_start + run_length  # Default end index
     
-    results_inversion_table <- rbind(results_inversion_table,
-                                     data.table(
-                                       inversion_id = inversion_id,
-                                       gene_name = c(dt_segment[[gene_col_index]][inversion_start_idx],
-                                                     dt_segment[[gene_col_index]][inversion_end_idx]),
-                                       role = c("start", "end")
-                                     ),
-                                     use.names = TRUE)
+    # Edge handling
+    if (inversion_start_idx == 1) {  # Starts at first row → ignore start, mark end as undefined
+      results_inversion_table <- rbind(results_inversion_table,
+                                       data.table(
+                                         inversion_id = inversion_id,
+                                         gene_name = dt_segment[[gene_col_index]][inversion_end_idx],  # Only end row
+                                         role = "undefined"  # Mark as undefined
+                                       ),
+                                       use.names = TRUE)
+    } else if (inversion_end_idx == nrow(dt_segment)) {  # Ends at last row → ignore end, mark start as undefined
+      results_inversion_table <- rbind(results_inversion_table,
+                                       data.table(
+                                         inversion_id = inversion_id,
+                                         gene_name = dt_segment[[gene_col_index]][inversion_start_idx],  # Only start row
+                                         role = "undefined"  # Mark as undefined
+                                       ),
+                                       use.names = TRUE)
+    } else {  # Normal case
+      results_inversion_table <- rbind(results_inversion_table,
+                                       data.table(
+                                         inversion_id = inversion_id,
+                                         gene_name = c(dt_segment[[gene_col_index]][inversion_start_idx],
+                                                       dt_segment[[gene_col_index]][inversion_end_idx]),
+                                         role = c("start", "end")
+                                       ),
+                                       use.names = TRUE)
+    }
   }
   
   return(results_inversion_table)  # Return final inversion table
