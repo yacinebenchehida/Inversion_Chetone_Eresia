@@ -36,13 +36,12 @@ assess_direction <- function(dt, pos_col_index = 9, keep_global = TRUE) {
   last_decreasing <- all(diff(last3) < 0)
   
   # Decide overall direction combining global trend, local monotony, and keep_global option
+  # 1) Both start and end monotonic in same direction
   if ((first_increasing && last_increasing) || (first_decreasing && last_decreasing)) {
-    # Both start and end monotonic in same direction
+    # a) Local trend matches global trend → keep global trend
     if ((first_increasing && global_direction == "positive") || (first_decreasing && global_direction == "negative")) {
-      # Local trend matches global trend → keep global trend
       direction <- global_direction
-    } else {
-      # Local trend conflicts with global trend
+    } else { # b) Local trend conflicts with global trend
       if (keep_global) {
         warning("Global and local trends are inconsistent; using global trend.")
         direction <- global_direction
@@ -51,14 +50,12 @@ assess_direction <- function(dt, pos_col_index = 9, keep_global = TRUE) {
       }
     }
     
-  } else if ((first_increasing || first_decreasing) && !(last_increasing || last_decreasing)) {
-    # Only start is monotonic, end is non-monotonic
+  } else if ((first_increasing || first_decreasing) && !(last_increasing || last_decreasing)) { # 2) Only start is monotonic, end is non-monotonic
+    # a) Global trend matches start → keep global trend
     if ((first_increasing && global_direction == "positive") || (first_decreasing && global_direction == "negative")) {
-      # Global trend matches start → keep global trend, with partial warning
       warning("Only the start of the window is monotonous; proceeding with caution.")
       direction <- global_direction
-    } else {
-      # Conflict between start and global trend
+    } else { # b) Conflict between start and global trend
       if (keep_global) {
         warning("Global and local trends are inconsistent; using global trend.")
         direction <- global_direction
@@ -67,13 +64,13 @@ assess_direction <- function(dt, pos_col_index = 9, keep_global = TRUE) {
       }
     }
     
-  } else if ((first_increasing && last_decreasing) || (first_decreasing && last_increasing)) {
-    # Start and end monotonic but in opposite directions → always non-monotonous
-    direction <- "non-monotonous"
+  } else if ((first_increasing && last_decreasing) || (first_decreasing && last_increasing)) { # 3) Start and end monotonic but in opposite directions → use global trend
+    
+    direction <-  global_direction
     
   } else {
     # Both start and end non-monotonic → always non-monotonous
-    direction <- "non-monotonous"
+    direction <- global_direction
   }
   
   # Handle rare case where global trend is exactly flat (medians equal)
