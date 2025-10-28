@@ -29,24 +29,37 @@ wrapper_detect_inversions <- function(dt, pos_col_index = 9, gene_col_index = 1,
     direction = direction
   )
   
-  if (!is.null(results_inversion_table) && nrow(results_inversion_table) > 0) {
+  if (!is.null(results_inversion_table) && nrow(results_inversion_table) > 0) {  # Only proceed if table exists
+    # Handle "undefined" inversions separately and assign type to start/end inversions
     results_inversion_table[, type := {
-      start_gene <- gene_name[role == "start"]
-      inv_start_pos <- count_dt[[pos_col_index]][match(start_gene, count_dt[[gene_col_index]])]
-      first3_positions <- head(count_dt[[pos_col_index]], 3)
-      last3_positions <- tail(count_dt[[pos_col_index]], 3)
-      translocated <- is_translocated_inversion(direction, inv_start_pos, first3_positions, last3_positions)
-      if (translocated) "inversion+translocation" else "simple inversion"
+      if (all(role == "undefined")) {  # All undefined → simple inversion type
+        rep("simple inversion", .N)
+      } else {  # Start/end inversions
+        start_gene <- gene_name[role == "start"]
+        if (length(start_gene) == 0) {  # No start gene → nothing to compute
+          rep(NA_character_, .N)
+        } else {
+          inv_start_pos <- count_dt[[pos_col_index]][match(start_gene, count_dt[[gene_col_index]])]
+          first3_positions <- head(count_dt[[pos_col_index]], 3)
+          last3_positions <- tail(count_dt[[pos_col_index]], 3)
+          translocated <- is_translocated_inversion(direction, inv_start_pos, first3_positions, last3_positions)
+          ifelse(translocated, "inversion+translocation", "simple inversion")
+        }
+      }
     }, by = inversion_id]
     
-    # Merge oversplit/adjacent inversions (often happens when syntheny is modified within the inversion)
-    results_inversion_table <- merge_oversplit_inversions(                                                         # Call merging function after type set
+    # Merge oversplit/adjacent inversions for all types
+    merged <- merge_oversplit_inversions(
       inv_table = results_inversion_table,
       dt = count_dt,
       pos_col_index = pos_col_index,
       gene_col_index = gene_col_index,
       direction = direction
     )
+    if (!is.null(merged) && nrow(merged) > 0) results_inversion_table <- merged  # Keep merged table if not empty
+    
+    # Fix short interruptions in inversions (syntheny change or local blast errors)
+    results_inversion_table <- Fix_fake_interruptions(inv_table = results_inversion_table, dt= count_dt, max_gap = 2,direction = direction)
   }
   
   if (plot_window) {  # Plot only if requested
@@ -73,12 +86,8 @@ wrapper_detect_inversions <- function(dt, pos_col_index = 9, gene_col_index = 1,
     print(p)  # Display plot
   }
   
-  if (nrow(results_inversion_table) == 0) {
-    message("There are no inversion in the specified window")
-    return(NULL)
-  } else {
-    inv_numb <- nrow(results_inversion_table)/2
-    message(paste("Youhouuuu! There are ",inv_numb," inversion(s) in the specified window"))
-    return(results_inversion_table)  # Return inversion table
-  }
-  
+  # Count total inversions including undefined
+  inv_numb <- length(unique(results_inversion_table$inversion_id))
+  message(paste("Youhouuuu! There are", inv_numb, "inversion(s) in the specified window"))
+  return(results_inversion_table)  # Return inversion table
+}
