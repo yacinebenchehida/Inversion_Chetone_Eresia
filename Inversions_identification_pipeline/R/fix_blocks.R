@@ -107,8 +107,14 @@ fix_blocks <- function(dt_segment, inv_table,
   # Materialize blocks as a data.table
   blocks_dt <- data.table::rbindlist(blocks)                 # combine list to data.table
   # Compute each block's net direction from start→end positions
-  blocks_dt[, net_dir_sign := sign(positions[end_idx] - positions[start_idx])]  # per-block sign
-  # For exact ties (flat), coerce to expected sign to avoid spurious "mixed"
+blocks_dt[, net_dir_sign := sign(
+  vapply(seq_len(.N), function(i)
+    positions[blocks_dt$end_idx[i]] - positions[blocks_dt$start_idx[i]],
+    numeric(1)
+  )
+)]
+# For exact ties (flat), coerce to expected sign to avoid spurious "mixed"
+blocks_dt[net_dir_sign == 0L, net_dir_sign := expected_sign]  # For exact ties (flat), coerce to expected sign to avoid spurious "mixed"
   blocks_dt[net_dir_sign == 0L, net_dir_sign := expected_sign]                  # treat flat as aligned
   
   # ------------------------------------------------------
