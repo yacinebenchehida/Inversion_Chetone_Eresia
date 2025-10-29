@@ -14,8 +14,8 @@ filter_contigs_by_proportion <- function(blast_dt, contig_col_index = 2, pos_col
   if (outlier) {
     mean_pos <- mean(dt[[pos_col_index]], na.rm = TRUE)   # compute mean of positions
     sd_pos <- sd(dt[[pos_col_index]], na.rm = TRUE)       # compute standard deviation of positions
-    lower_margin <- mean_pos -   sd_pos
-    upper_margin <- mean_pos +   sd_pos
+    lower_margin <- mean_pos -   2 * sd_pos
+    upper_margin <- mean_pos +   2 * sd_pos
     dt <- dt[dt[[pos_col_index]] >= lower_margin & dt[[pos_col_index]] <= upper_margin]  # keep values within bounds
   }
   
@@ -45,7 +45,7 @@ filter_contigs_by_proportion <- function(blast_dt, contig_col_index = 2, pos_col
   filtered_dt <- dt[dt[[contig_col_index]] %in% selected_contigs]
   
   # Call the Chaos_noise_score function on the filtered data
-  high_chaos <- dispersion_score(filtered_dt, pos_col_index = pos_col_index, chaos_excess_score = 1.6)
+  high_chaos <- dispersion_score(filtered_dt, pos_col_index = pos_col_index, chaos_excess_score = 1.7)
   
   # If chaos is too high, print message and stop
   if (high_chaos) {
