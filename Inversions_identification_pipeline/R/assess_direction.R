@@ -1,5 +1,9 @@
 assess_direction <- function(dt, pos_col_index = 9, keep_global = TRUE) {
   
+  if (is.null(dt)) {
+    return(NULL)
+  }
+  
   # Convert input to data.table for consistent indexing
   dt <- as.data.table(dt)
   
