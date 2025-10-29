@@ -60,7 +60,9 @@ wrapper_detect_inversions <- function(dt, pos_col_index = 9, gene_col_index = 1,
     
     # Fix short interruptions in inversions (syntheny change or local blast errors)
     results_inversion_table <- Fix_fake_interruptions(inv_table = results_inversion_table, dt= count_dt, max_gap = 2,direction = direction)
+    
   }
+  
   
   if (plot_window) {  # Plot only if requested
     library(ggplot2)  # Load ggplot2
@@ -88,6 +90,6 @@ wrapper_detect_inversions <- function(dt, pos_col_index = 9, gene_col_index = 1,
   
   # Count total inversions including undefined
   inv_numb <- length(unique(results_inversion_table$inversion_id))
-  message(paste("Youhouuuu! There are", inv_numb, "inversion(s) in the specified window"))
+  message(paste("There are", inv_numb, "inversion(s) in the specified window"))
   return(results_inversion_table)  # Return inversion table
 }
