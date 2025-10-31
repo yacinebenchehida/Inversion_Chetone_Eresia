@@ -1,13 +1,3 @@
-A) Need to add a function that 
+1) a functions that counts events happening in a window
 
-1) look at adjacent genes and keep looking as long as the direction successive gene is the same (if there is an interruption of less than 3 genes) it should keep looking. 
-if the direction is negative/down and there is a jump up and the new successive points coordinates keep going down but in absolute value are higher than the first point of the block, then that should corresponds to a new block of points. 
-if the direction is positive/up and there is a jump down and the new successive points coordinates keep going up but in absolute value are lower than the first point of the block, then that should corresponds to a new block of points. 
-
-2) if all blocks in all the window analysed are pointing in the same direction. => there are no inversion at all. The big jump(s) should be considered as an "undefined translocation". 
-
-3) if the blocks are going direction, check if in each block there are inversion inferred, if those are inferred because of the change of the type of inversion (i.e. from simple inversion to translocation+inversion or the reverse) then that inversion should be removed. 
-if the block is going in the same direction as the global direction, then do nothing.
-if the block is going in the opposite direction as the global directino, the end of the block should be assigned to an indefined inversion breakpoint. 
-
-B) for the merge_oversplit_inversions function check if not adjacent genuine inversion (by checking their coordinate). 
+2) plotting function that plots the windows and makes a geom_rect around each spotted event
