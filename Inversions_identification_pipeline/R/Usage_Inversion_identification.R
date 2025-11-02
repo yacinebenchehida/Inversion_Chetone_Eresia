@@ -126,3 +126,30 @@ invers_table <- Fix_fake_interruptions(inv_table = invers_table, dt = filtered_d
 
 detect_translocations(dt_segment = filtered_dt, inv_table = invers_table, pos_col_index = 9, gene_col_index = 1, min_consecutive = 3, direction = my_dir)
 
+
+
+
+
+
+
+
+
+
+
+library(ggplot2)
+library(data.table)
+
+setwd("/Users/yacinebenchehida/Desktop/Convergent_evolution/Chetone_histrio/R_package")
+# Read BLAST output
+dt <- fread("Inputs/GCA_963082685.1_ilCycAlbi1.1.txt",header = FALSE)
+dispersion_score(dt, pos_col_index = 9, chaos_excess_score = 2)
+filtered_dt <- filter_contigs_by_proportion(dt,2, threshold =0.7,outlier = TRUE)
+my_dir <- assess_direction(filtered_dt)
+invers_table <- wrapper_detect_inversions(filtered_dt, min_consecutive=3, plot_window=TRUE)
+invers_table <- merge_oversplit_inversions(invers_table, filtered_dt, pos_col_index = 9, gene_col_index = 1, my_dir)
+invers_table <- Fix_fake_interruptions(inv_table = invers_table, dt = filtered_dt, pos_col_index = 9, gene_col_index = 1, my_dir, max_gap = 2)
+blocks <- identify_blocks(dt= filtered_dt, inv_table = invers_table, pos_col_index = 9, gene_col_index = 1, direction = my_dir, max_gap = 2,resume_confirm = 2)
+identify_blocks(dt= filtered_dt, inv_table = invers_table, pos_col_index = 9, gene_col_index = 1, direction = my_dir, max_gap = 2,resume_confirm = 2)
+
+ann_block <- detect_inversions_translo_using_blocks(dt= filtered_dt, direction = my_dir, pos_col_index = 9, gene_col_index = 1, min_consecutive = 3, block_data = blocks)
+plot_genes(dt = filtered_dt, block_annotation = ann_block, pos_col_index = 9, gene_col_index = 1, plot_title = "Gene order plot")
