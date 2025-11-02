@@ -1,3 +1,1 @@
 1) a functions that counts events happening in a window
-
-2) plotting function that plots the windows and makes a geom_rect around each spotted event
