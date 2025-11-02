@@ -149,7 +149,7 @@ identify_blocks <- function(dt, inv_table,
     if (bump_start + 1 <= n) {
       s_after <- step_sign(positions[bump_start + 1] - positions[bump_start])
       if (s_after != 0 && s_after != new_sign) {
-        new_start <- bump_start + 1                   # drop singleton spike
+        new_start <- bump_start                    # drop singleton spike
         new_sign  <- s_after                          # take the sustained direction
       }
     }
