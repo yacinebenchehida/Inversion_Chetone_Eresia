@@ -76,8 +76,6 @@ detect_inversions_translo_using_blocks <- function(dt,
     } else {
       # Block is colinear
       block_data$role[i] <- "colinear"
-      block_data$start_breakpoint[i] <- "Not_applicable"
-      block_data$end_breakpoint[i] <- "Not_applicable"
     }
   }
   
@@ -104,6 +102,25 @@ detect_inversions_translo_using_blocks <- function(dt,
         inversion_median <- block_data$median_pos[i]
         if (block_data$median_pos[i] < lower_bound || block_data$median_pos[i] > upper_bound) {
           block_data$role[i] <- "translocation"
+          # Determine start breakpoint
+          if (i == 1 || block_data$role[i-1] == "small_block") {
+            block_data$start_breakpoint[i] <- "Undefined"
+          } else {
+            block_data$start_breakpoint[i] <- paste(block_data$end_gene[i-1], block_data$start_gene[i], sep="_")
+          }
+          
+          # Determine end breakpoint
+          if (i < nrow(block_data) && !is.na(block_data$role[i+1]) && block_data$role[i+1] == "small_block") {
+            block_data$end_breakpoint[i] <- "Undefined"
+          } else if (i == nrow(block_data)) {
+            block_data$end_breakpoint[i] <- "Undefined"
+          } else {
+            block_data$end_breakpoint[i] <- paste(block_data$end_gene[i], block_data$start_gene[i+1], sep="_")
+          }
+          
+        }else{
+          block_data$start_breakpoint[i] <- "Not_applicable"
+          block_data$end_breakpoint[i] <- "Not_applicable"
         }
       }
     }
@@ -130,6 +147,7 @@ detect_inversions_translo_using_blocks <- function(dt,
   # -----------------------------#
   # Correct breakpoints visually #
   # -----------------------------#
+  print(block_data)
   for(i in seq_len(nrow(block_data))) {
     # Only for inversion/translocation/inversion+translocation
     if(block_data$role[i] %in% c("inversion","translocation","inversion+translocation")) {
@@ -145,10 +163,7 @@ detect_inversions_translo_using_blocks <- function(dt,
             curr_gene_start <- block_data$start_gene[i]
             block_data$start_breakpoint[i] <- paste(genes[which(genes==curr_gene_start)-2], genes[which(genes==curr_gene_start)-1] , sep="_")
             block_data$start_gene[i] <- genes[which(genes==curr_gene_start)-1]
-            block_data$n_genes[i] <- block_data$n_genes[i] + 1
-            block_data$end_gene[i-1] <- genes[which(genes==curr_gene_start)-2]
-            block_data$n_genes[i-1] <- block_data$n_genes[i] -1
-            
+
           }
         }
       }
@@ -162,11 +177,9 @@ detect_inversions_translo_using_blocks <- function(dt,
           if((block_data$direction[i] == "positive" && curr_median < next_median) ||
              (block_data$direction[i] == "negative" && curr_median > next_median)) {
             curr_gene_end <- block_data$end_gene[i]
-            block_data$end_breakpoint[i] <- paste(genes[which(genes==curr_gene_end)+2], genes[which(genes==curr_gene_end)+1] , sep="_")
-            block_data$end_gene[i] <- genes[which(genes==curr_gene_end)+1]
-            block_data$n_genes[i] <- block_data$n_genes[i] + 1
-            block_data$end_gene[i+1] <- genes[which(genes==curr_gene_end)+2]
-            block_data$n_genes[i+1] <- block_data$n_genes[i] -1
+            block_data$end_breakpoint[i] <- paste(genes[which(genes==curr_gene_end)-2], genes[which(genes==curr_gene_end)-1] , sep="_")
+            block_data$end_gene[i] <- genes[which(genes==curr_gene_end)-1]
+            block_data$n_genes[i] <- block_data$n_genes[i] - 1
           }
         }
       }
