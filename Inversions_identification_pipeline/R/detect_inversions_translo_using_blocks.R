@@ -124,5 +124,54 @@ detect_inversions_translo_using_blocks <- function(dt,
     }
   }
   
+  # -----------------------------#
+  #  Adjust defined breakpoints  #
+  # -----------------------------#
+  # -----------------------------#
+  # Correct breakpoints visually #
+  # -----------------------------#
+  for(i in seq_len(nrow(block_data))) {
+    # Only for inversion/translocation/inversion+translocation
+    if(block_data$role[i] %in% c("inversion","translocation","inversion+translocation")) {
+      
+      # Fix start breakpoint if defined
+      if(!is.na(block_data$start_breakpoint[i]) && block_data$start_breakpoint[i] != "Undefined") {
+        if(i > 1) {
+          prev_median <- block_data$median_pos[i-1]
+          curr_median <- block_data$median_pos[i]
+          # Compare previous block to current, adjust start breakpoint
+          if((block_data$direction[i-1] == "positive" && prev_median < curr_median) ||
+             (block_data$direction[i-1] == "negative" && prev_median > curr_median)) {
+            curr_gene_start <- block_data$start_gene[i]
+            block_data$start_breakpoint[i] <- paste(genes[which(genes==curr_gene_start)-2], genes[which(genes==curr_gene_start)-1] , sep="_")
+            block_data$start_gene[i] <- genes[which(genes==curr_gene_start)-1]
+            block_data$n_genes[i] <- block_data$n_genes[i] + 1
+            block_data$end_gene[i-1] <- genes[which(genes==curr_gene_start)-2]
+            block_data$n_genes[i-1] <- block_data$n_genes[i] -1
+            
+          }
+        }
+      }
+      
+      # Fix end breakpoint if defined
+      if(!is.na(block_data$end_breakpoint[i]) && block_data$end_breakpoint[i] != "Undefined") {
+        if(i < nrow(block_data)) {
+          next_median <- block_data$median_pos[i+1]
+          curr_median <- block_data$median_pos[i]
+          # Compare next block to current, adjust end breakpoint
+          if((block_data$direction[i] == "positive" && curr_median < next_median) ||
+             (block_data$direction[i] == "negative" && curr_median > next_median)) {
+            curr_gene_end <- block_data$end_gene[i]
+            block_data$end_breakpoint[i] <- paste(genes[which(genes==curr_gene_end)+2], genes[which(genes==curr_gene_end)+1] , sep="_")
+            block_data$end_gene[i] <- genes[which(genes==curr_gene_end)+1]
+            block_data$n_genes[i] <- block_data$n_genes[i] + 1
+            block_data$end_gene[i+1] <- genes[which(genes==curr_gene_end)+2]
+            block_data$n_genes[i+1] <- block_data$n_genes[i] -1
+          }
+        }
+      }
+    }
+  }
+
   return(block_data)
 }
