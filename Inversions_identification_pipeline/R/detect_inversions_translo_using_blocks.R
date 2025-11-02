@@ -7,7 +7,6 @@ detect_inversions_translo_using_blocks <- function(dt,
   # --------------# 
   #  Prepare data # 
   # --------------# 
-  
   # Guard: need enough rows to compute first/last medians and detect runs
   if (nrow(dt) < 6) stop("Not enough points to detect translocations (need ≥ 6).")
   
@@ -98,6 +97,8 @@ detect_inversions_translo_using_blocks <- function(dt,
   # ----------------------#
   for (i in seq_len(nrow(block_data))) {
     if (block_data$role[i] == "colinear") {
+      block_data$start_breakpoint[i] <- "Not_applicable"
+      block_data$end_breakpoint[i] <- "Not_applicable"
       if(i > 1 && i < nrow(block_data)) {
         inversion_median <- block_data$median_pos[i]
         if (block_data$median_pos[i] < lower_bound || block_data$median_pos[i] > upper_bound) {
@@ -118,14 +119,10 @@ detect_inversions_translo_using_blocks <- function(dt,
             block_data$end_breakpoint[i] <- paste(block_data$end_gene[i], block_data$start_gene[i+1], sep="_")
           }
           
-        }else{
-          block_data$start_breakpoint[i] <- "Not_applicable"
-          block_data$end_breakpoint[i] <- "Not_applicable"
         }
       }
     }
   }
-  
   
   # ---------------------------------------------------# 
   #  Correct for translos wrongly assign to inversions # 
@@ -133,7 +130,7 @@ detect_inversions_translo_using_blocks <- function(dt,
   cleaner_block_data <- block_data[role != "small_block"]
   
   if (all(cleaner_block_data$role != "colinear")) {
-    if (all(cleaner_block_data$role == "inversion") || all(cleaner_block_data$role == "inversion+translocation")) {
+    if (all(cleaner_block_data$role %in% c("inversion","inversion+translocation"))) {
       if (all(cleaner_block_data$direction != direction)) {
         set(block_data, i = which(block_data$role %in% c("inversion","inversion+translocation")),
             j = "role", value = "translocation")
@@ -144,10 +141,6 @@ detect_inversions_translo_using_blocks <- function(dt,
   # -----------------------------#
   #  Adjust defined breakpoints  #
   # -----------------------------#
-  # -----------------------------#
-  # Correct breakpoints visually #
-  # -----------------------------#
-  print(block_data)
   for(i in seq_len(nrow(block_data))) {
     # Only for inversion/translocation/inversion+translocation
     if(block_data$role[i] %in% c("inversion","translocation","inversion+translocation")) {
