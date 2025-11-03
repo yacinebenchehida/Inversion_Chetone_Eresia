@@ -150,6 +150,24 @@ detect_inversions_translo_using_blocks <- function(dt,
         if(i > 1) {
           prev_median <- block_data$median_pos[i-1]
           curr_median <- block_data$median_pos[i]
+          
+          # find the median of the first min_consecutive point of the block i and of the last min_consecutive of the block i - 1
+          debut_block <- block_data$start_gene[i]
+          fin_block <- block_data$end_gene[i]
+          start_row <- which(dt[[gene_col_index]] == debut_block)
+          end_row   <- which(dt[[gene_col_index]] == fin_block)
+          block_values <- dt[seq(from = start_row, to = end_row), ][[pos_col_index]]
+          curr_median <- median(block_values[1:(min_consecutive + 1)])
+            
+          
+          debut_block <- block_data$start_gene[i-1]
+          fin_block <- block_data$end_gene[i-1]
+          start_row <- which(dt[[gene_col_index]] == debut_block)
+          end_row   <- which(dt[[gene_col_index]] == fin_block)
+          block_values <- dt[seq(from = start_row, to = end_row), ][[pos_col_index]]
+          prev_median <- median(block_values[(length(block_values) - min_consecutive):length(block_values)])
+          
+          
           # Compare previous block to current, adjust start breakpoint
           if((block_data$direction[i-1] == "positive" && prev_median < curr_median) ||
              (block_data$direction[i-1] == "negative" && prev_median > curr_median)) {
@@ -162,24 +180,40 @@ detect_inversions_translo_using_blocks <- function(dt,
       }
       
       # Fix end breakpoint if defined
-      #if(!is.na(block_data$end_breakpoint[i]) && block_data$end_breakpoint[i] != "Undefined") {
-        #if(i < nrow(block_data)) {
-          #next_median <- block_data$median_pos[i+1]
-          #curr_median <- block_data$median_pos[i]
+      if(!is.na(block_data$end_breakpoint[i]) && block_data$end_breakpoint[i] != "Undefined") {
+        if (i < nrow(block_data) && !(block_data$role[i+1] %in% c("inversion","translocation","inversion+translocation"))) {
+
+          # find the median of the last min_consecutive point of the block i and of the first min_consecutive of the block i + 1
+          debut_block <- block_data$start_gene[i]
+          fin_block <- block_data$end_gene[i]
+          start_row <- which(dt[[gene_col_index]] == debut_block)
+          end_row   <- which(dt[[gene_col_index]] == fin_block)
+          block_values <- dt[seq(from = start_row, to = end_row), ][[pos_col_index]]
+          curr_median <- median(block_values[(length(block_values) - min_consecutive):length(block_values)])
+
+          debut_block <- block_data$start_gene[i+1]
+          fin_block <- block_data$end_gene[i+1]
+          start_row <- which(dt[[gene_col_index]] == debut_block)
+          end_row   <- which(dt[[gene_col_index]] == fin_block)
+          block_values <- dt[seq(from = start_row, to = end_row), ][[pos_col_index]]
+          next_median <- median(block_values[1:(min_consecutive + 1)])
+          
+
           # Compare next block to current, adjust end breakpoint
-          #if((block_data$direction[i] == "positive" && curr_median > next_median) ||
-             #(block_data$direction[i] == "negative" && curr_median < next_median)) {
-            #print(i)
-            #curr_gene_end <- block_data$end_gene[i]
-            #block_data$end_breakpoint[i] <- paste(genes[which(genes==curr_gene_end)-1], genes[which(genes==curr_gene_end)-0] , sep="_")
-            #block_data$end_gene[i] <- genes[which(genes==curr_gene_end)-1]
+          if((block_data$direction[i] == "positive" && curr_median < next_median) ||
+             (block_data$direction[i] == "negative" && curr_median > next_median)) {
+            curr_gene_end <- block_data$end_gene[i]
+            
+            block_data$end_breakpoint[i] <- paste(genes[which(genes==curr_gene_end)-1], genes[which(genes==curr_gene_end)] , sep="_")
+            block_data$end_gene[i] <- genes[which(genes==curr_gene_end)-1]
+            block_data$start_gene[i+1] <- genes[which(genes==curr_gene_end)]
             #block_data$n_genes[i] <- block_data$n_genes[i] - 1
             #}
-          #}
-        # }
+          }
+         }
+      }
     }
   }
-  
   # ---------------------------------------------------------#
   #  Classified instable direction blocks to unclear_blocks  #
   # ---------------------------------------------------------#
@@ -225,7 +259,9 @@ detect_inversions_translo_using_blocks <- function(dt,
       }
     }
   }
+
+  # -----------------------#
+  #  Return the final data #
+  # -----------------------#
   return(block_data)
 }
-
-
