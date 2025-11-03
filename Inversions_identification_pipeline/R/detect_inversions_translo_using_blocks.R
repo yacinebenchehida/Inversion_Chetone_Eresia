@@ -1,9 +1,9 @@
 detect_inversions_translo_using_blocks <- function(dt,
-                                           pos_col_index = 9,
-                                           gene_col_index = 1,
-                                           min_consecutive = 3,
-                                           direction,
-                                           block_data) {
+                                                   pos_col_index = 9,
+                                                   gene_col_index = 1,
+                                                   min_consecutive = 3,
+                                                   direction,
+                                                   block_data) {
   # --------------# 
   #  Prepare data # 
   # --------------# 
@@ -21,14 +21,14 @@ detect_inversions_translo_using_blocks <- function(dt,
   
   # Pull convenient vectors (names unchanged)
   genes  <- as.character(dt[[gene_col_index]])   # gene identifiers (ordered)
-
+  
   # Define in-bounds using medians of the first 3 and the last 3 positions
   med_first3 <- median(positions[1:3])                                         # median of first 3
   med_last3  <- median(positions[(length(positions) - 2):length(positions)])   # median of last 3
   lower_bound <- min(med_first3, med_last3)                                    # inclusive lower bound
   upper_bound <- max(med_first3, med_last3)                                    # inclusive upper bound
   
-
+  
   # Initialize role and breakpoint columns
   block_data <- block_data[, -c("mean_step"), with = FALSE]
   block_data[, role := NA_character_]           # create empty role column
@@ -84,12 +84,12 @@ detect_inversions_translo_using_blocks <- function(dt,
   for (i in seq_len(nrow(block_data))) {
     if (block_data$role[i] == "inversion") {
       if(i > 1 && i < nrow(block_data)) {
-      inversion_median <- block_data$median_pos[i]
-      if (block_data$median_pos[i] < lower_bound || block_data$median_pos[i] > upper_bound) {
-        block_data$role[i] <- "inversion+translocation"
+        inversion_median <- block_data$median_pos[i]
+        if (block_data$median_pos[i] < lower_bound || block_data$median_pos[i] > upper_bound) {
+          block_data$role[i] <- "inversion+translocation"
+        }
       }
     }
-   }
   }
   
   # ----------------------# 
@@ -156,28 +156,76 @@ detect_inversions_translo_using_blocks <- function(dt,
             curr_gene_start <- block_data$start_gene[i]
             block_data$start_breakpoint[i] <- paste(genes[which(genes==curr_gene_start)-2], genes[which(genes==curr_gene_start)-1] , sep="_")
             block_data$start_gene[i] <- genes[which(genes==curr_gene_start)-1]
-
+            
           }
         }
       }
       
       # Fix end breakpoint if defined
-      if(!is.na(block_data$end_breakpoint[i]) && block_data$end_breakpoint[i] != "Undefined") {
-        if(i < nrow(block_data)) {
-          next_median <- block_data$median_pos[i+1]
-          curr_median <- block_data$median_pos[i]
+      #if(!is.na(block_data$end_breakpoint[i]) && block_data$end_breakpoint[i] != "Undefined") {
+        #if(i < nrow(block_data)) {
+          #next_median <- block_data$median_pos[i+1]
+          #curr_median <- block_data$median_pos[i]
           # Compare next block to current, adjust end breakpoint
-          if((block_data$direction[i] == "positive" && curr_median < next_median) ||
-             (block_data$direction[i] == "negative" && curr_median > next_median)) {
-            curr_gene_end <- block_data$end_gene[i]
-            block_data$end_breakpoint[i] <- paste(genes[which(genes==curr_gene_end)-1], genes[which(genes==curr_gene_end)-0] , sep="_")
-            block_data$end_gene[i] <- genes[which(genes==curr_gene_end)-1]
-            block_data$n_genes[i] <- block_data$n_genes[i] - 1
-          }
+          #if((block_data$direction[i] == "positive" && curr_median > next_median) ||
+             #(block_data$direction[i] == "negative" && curr_median < next_median)) {
+            #print(i)
+            #curr_gene_end <- block_data$end_gene[i]
+            #block_data$end_breakpoint[i] <- paste(genes[which(genes==curr_gene_end)-1], genes[which(genes==curr_gene_end)-0] , sep="_")
+            #block_data$end_gene[i] <- genes[which(genes==curr_gene_end)-1]
+            #block_data$n_genes[i] <- block_data$n_genes[i] - 1
+            #}
+          #}
+        # }
+    }
+  }
+  
+  # ---------------------------------------------------------#
+  #  Classified instable direction blocks to unclear_blocks  #
+  # ---------------------------------------------------------#
+  for(i in seq_len(nrow(block_data))) {
+    # Only for inversion/translocation/inversion+translocation
+    if(block_data$role[i] %in% c("inversion","translocation","inversion+translocation")) {
+      debut_block <- block_data$start_gene[i]
+      fin_block <- block_data$end_gene[i]
+      # Find the corresponding row numbers
+      start_row <- which(dt[[gene_col_index]] == debut_block)
+      end_row   <- which(dt[[gene_col_index]] == fin_block)
+      
+      # Extract all rows between them (inclusive)
+      block_values <- dt[seq(from = start_row, to = end_row), ][[pos_col_index]]
+      consecutive_sign_diff <- sign(diff(block_values))
+      tbl <- table(consecutive_sign_diff)
+      if(length(tbl) < 2) next
+  
+      ratio_sign_change_in_block <- max(tbl) / sum(tbl)
+      if(ratio_sign_change_in_block < 0.75){
+        block_data$role[i] <- "unclear"
+        block_data$start_breakpoint[i] <- "Not_applicable"
+        block_data$end_breakpoint[i] <- "Not_applicable"
+      }
+    }
+  }
+  
+  # -----------------------------------------------------#
+  #  Fix breakpoints assigned to different breakpoints   #
+  # -----------------------------------------------------#
+  for(i in seq_len(nrow(block_data))) {
+    # Only for inversion/translocation/inversion+translocation
+    if(block_data$role[i] %in% c("inversion","translocation","inversion+translocation")) {
+      if(i<nrow(block_data)){
+        if(!is.na(block_data$end_breakpoint[i]) && !is.na(block_data$start_breakpoint[i+1])) {
+          block1_end <- unlist(strsplit(block_data$end_breakpoint[i], "_"))[1]
+          block2_start <- unlist(strsplit(block_data$start_breakpoint[i+1], "_"))[2]
+            if(block1_end==block2_start){
+              block_data$end_breakpoint[i]=block_data$start_breakpoint[i+1]
+              block_data$end_gene[i] <- unlist(strsplit(block_data$start_breakpoint[i+1], "_"))[1]
+            }
         }
       }
     }
   }
-
   return(block_data)
 }
+
+
