@@ -170,7 +170,7 @@ detect_inversions_translo_using_blocks <- function(dt,
           if((block_data$direction[i] == "positive" && curr_median < next_median) ||
              (block_data$direction[i] == "negative" && curr_median > next_median)) {
             curr_gene_end <- block_data$end_gene[i]
-            block_data$end_breakpoint[i] <- paste(genes[which(genes==curr_gene_end)-2], genes[which(genes==curr_gene_end)-1] , sep="_")
+            block_data$end_breakpoint[i] <- paste(genes[which(genes==curr_gene_end)-1], genes[which(genes==curr_gene_end)-0] , sep="_")
             block_data$end_gene[i] <- genes[which(genes==curr_gene_end)-1]
             block_data$n_genes[i] <- block_data$n_genes[i] - 1
           }
