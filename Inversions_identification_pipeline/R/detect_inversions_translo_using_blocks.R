@@ -28,7 +28,6 @@ detect_inversions_translo_using_blocks <- function(dt,
   lower_bound <- min(med_first3, med_last3)                                    # inclusive lower bound
   upper_bound <- max(med_first3, med_last3)                                    # inclusive upper bound
   
-  
   # Initialize role and breakpoint columns
   block_data <- block_data[, -c("mean_step"), with = FALSE]
   block_data[, role := NA_character_]           # create empty role column
@@ -84,8 +83,17 @@ detect_inversions_translo_using_blocks <- function(dt,
   for (i in seq_len(nrow(block_data))) {
     if (block_data$role[i] == "inversion") {
       if(i > 1 && i < nrow(block_data)) {
-        inversion_median <- block_data$median_pos[i]
-        if (block_data$median_pos[i] < lower_bound || block_data$median_pos[i] > upper_bound) {
+        debut_block <- block_data$start_gene[i]
+        fin_block <- block_data$end_gene[i]
+        start_row <- which(dt[[gene_col_index]] == debut_block)
+        end_row   <- which(dt[[gene_col_index]] == fin_block)
+        block_values <- dt[seq(from = start_row, to = end_row), ][[pos_col_index]]
+        start_genes_median <- median(block_values[1:(min_consecutive + 1)])
+        end_genes_median <- median(block_values[(length(block_values) - min_consecutive):length(block_values)])
+        
+        if ((start_genes_median < lower_bound && end_genes_median < lower_bound) ||
+            (start_genes_median > upper_bound && end_genes_median > upper_bound)) {
+          
           block_data$role[i] <- "inversion+translocation"
         }
       }
@@ -101,7 +109,19 @@ detect_inversions_translo_using_blocks <- function(dt,
       block_data$end_breakpoint[i] <- "Not_applicable"
       if(i > 1 && i < nrow(block_data)) {
         inversion_median <- block_data$median_pos[i]
-        if (block_data$median_pos[i] < lower_bound || block_data$median_pos[i] > upper_bound) {
+        # find the median of the first and last min_consecutive point of the block 
+        debut_block <- block_data$start_gene[i]
+        fin_block <- block_data$end_gene[i]
+        start_row <- which(dt[[gene_col_index]] == debut_block)
+        end_row   <- which(dt[[gene_col_index]] == fin_block)
+        block_values <- dt[seq(from = start_row, to = end_row), ][[pos_col_index]]
+        start_genes_median <- median(block_values[1:(min_consecutive + 1)])
+        end_genes_median <- median(block_values[(length(block_values) - min_consecutive):length(block_values)])
+        
+        
+        if ((start_genes_median < lower_bound && end_genes_median < lower_bound) ||
+            (start_genes_median > upper_bound && end_genes_median > upper_bound)) {
+          
           block_data$role[i] <- "translocation"
           # Determine start breakpoint
           if (i == 1 || block_data$role[i-1] == "small_block") {
@@ -214,6 +234,7 @@ detect_inversions_translo_using_blocks <- function(dt,
       }
     }
   }
+  
   # ---------------------------------------------------------#
   #  Classified instable direction blocks to unclear_blocks  #
   # ---------------------------------------------------------#
@@ -259,9 +280,5 @@ detect_inversions_translo_using_blocks <- function(dt,
       }
     }
   }
-
-  # -----------------------#
-  #  Return the final data #
-  # -----------------------#
   return(block_data)
 }
