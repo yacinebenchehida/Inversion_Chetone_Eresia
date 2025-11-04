@@ -1,1 +1,5 @@
 1) a functions that counts events happening in a window
+
+2) solve nested translocations
+
+3) near breakpoint scan and fix? (backward check)
