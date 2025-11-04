@@ -5,3 +5,5 @@
 3) near breakpoint scan and fix? (backward check)
 
 4) fix end translocation due to noise
+
+5) how to handle structural variants identified but with double undefined breakpoints?
