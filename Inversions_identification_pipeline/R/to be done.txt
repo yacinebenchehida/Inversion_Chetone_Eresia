@@ -3,3 +3,5 @@
 2) solve nested translocations
 
 3) near breakpoint scan and fix? (backward check)
+
+4) fix end translocation due to noise
