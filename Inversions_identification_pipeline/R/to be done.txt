@@ -1,5 +1,13 @@
-1) a functions that counts events happening in a window
 
+TO DO LIST:
+
+1) check if we can get an estimate of the direction using busco genes
+2) if 1) is good better then check how results vary from one window to the next
+3) make plots looking at frequency of each breakpoint
+4) look also how frequently when there is an inversion it contains ivory
+5) start thinking of the real permutation approach
+
+future potential refinement:
 2) solve nested translocations
 
 3) near breakpoint scan and fix? (backward check)
