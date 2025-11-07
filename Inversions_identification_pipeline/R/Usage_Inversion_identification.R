@@ -153,3 +153,85 @@ identify_blocks(dt= filtered_dt, inv_table = invers_table, pos_col_index = 9, ge
 
 ann_block <- detect_inversions_translo_using_blocks(dt= filtered_dt, direction = my_dir, pos_col_index = 9, gene_col_index = 1, min_consecutive = 3, block_data = blocks)
 plot_genes(dt = filtered_dt, block_annotation = ann_block, pos_col_index = 9, gene_col_index = 1, plot_title = "Gene order plot")
+
+
+
+
+
+
+
+
+
+
+setwd("/Users/yacinebenchehida/Desktop/Convergent_evolution/Inversion")
+folder_path <- "/Users/yacinebenchehida/Desktop/Convergent_evolution/Inversion"
+
+gca_files <- list.files(folder_path, pattern = "^GCA.*tsv", full.names = TRUE)
+gca_files <- head(gca_files, 1000)
+
+dropped_counter <- 0 
+
+inversion_results <- lapply(seq_along(gca_files), function(i) {
+  
+  file <- gca_files[i]
+  gca_name <- tools::file_path_sans_ext(basename(file))
+  message(sprintf("[%d/%d] Processing %s...", i, length(gca_files), gca_name))
+  
+  dt <- fread(file, header = FALSE)
+  
+  result <- tryCatch({
+    suppressMessages(suppressWarnings({
+      
+      filtered_dt <- filter_contigs_by_proportion(dt, contig_col_index = 2, threshold = 0.7, outlier = TRUE)
+      
+      if(is.null(filtered_dt)){
+        dropped_counter <<- dropped_counter + 1
+        print(paste(dropped_counter," dropped windows",sep=""))
+      }
+      
+      my_dir <- assess_direction(filtered_dt)
+      
+      if (!is.null(filtered_dt) && nrow(filtered_dt) > 0) {
+        
+        blocks <- identify_blocks(dt = filtered_dt, pos_col_index = 10, gene_col_index = 1, direction = my_dir, max_gap = 2, resume_confirm = 1)
+        ann_block <- detect_inversions_translo_using_blocks(dt = filtered_dt, direction = my_dir, pos_col_index = 10, gene_col_index = 1, min_consecutive = 3, block_data = blocks)
+        the_event <- events_counter(ann_block)
+        
+        # Multiple event outputs allowed
+        if (any(the_event == "inversion")) {
+          pdf(file.path("pdf_outputs/inversions", paste0(gca_name, ".pdf")))
+          p <- plot_data(dt = filtered_dt, block_annotation = ann_block, pos_col_index = 10, gene_col_index = 1, plot_title = gca_name)
+          print(p)
+          dev.off()
+        }
+        
+        if (any(the_event == "translocation")) {
+          pdf(file.path("pdf_outputs/translocations", paste0(gca_name, ".pdf")))
+          p <- plot_data(dt = filtered_dt, block_annotation = ann_block, pos_col_index = 10, gene_col_index = 1, plot_title = gca_name)
+          print(p)
+          dev.off()
+        }
+        
+        if (any(the_event == "inversion+translocation")) {
+          pdf(file.path("pdf_outputs/inversions_translocations", paste0(gca_name, ".pdf")))
+          p <- plot_data(dt = filtered_dt, block_annotation = ann_block, pos_col_index = 10, gene_col_index = 1, plot_title = gca_name)
+          print(p)
+          dev.off()
+        }
+        
+        if (!is.null(ann_block) && nrow(ann_block) > 0) {
+          return(list(name = gca_name, data = ann_block))
+        }
+      }
+      
+      NULL
+    }))
+  },
+  error = function(e) {
+    message(sprintf("Skipping %s: %s", basename(file), e$message))
+    NULL
+  })
+  
+  return(result)
+})
+
