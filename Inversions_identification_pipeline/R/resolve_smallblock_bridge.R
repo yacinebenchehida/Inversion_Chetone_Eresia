@@ -79,17 +79,17 @@ resolve_smallblock_bridge <- function(block_annotation, filtered_dt) {
     start_gene_small <- block_annotation$start_gene[i2]
     
     # Map gene ids to positions using filtered_dt V9
-    pos_end_block3 <- pos_map[gene == start_gene_block3, pos][1]
-    pos_end_small <- pos_map[gene == start_gene_small, pos][1]
+    pos_start_block3 <- pos_map[gene == start_gene_block3, pos][1]
+    pos_end_small <- pos_map[gene == end_gene_small, pos][1]
     
     # Check trend continuity:
-    follows_trend <- (dir2 == "positive" && start_gene_block3 > end_gene_small) ||
-      (dir1 == "negative" && start_gene_block3 < end_gene_small)
+    follows_trend <- (dir2 == "positive" && pos_start_block3 > pos_end_small) ||
+      (dir2 == "negative" && pos_start_block3 < pos_end_small)
     
     # If trend is followed, set the start breakpoint of the last event
     if (follows_trend) {
       block_annotation$start_breakpoint[i3] <- paste(start_gene_small, end_gene_small, sep = "_")
-      block_annotation$start_gene[i3] <- start_gene_small
+      block_annotation$start_gene[i3] <- end_gene_small
     }else{
       block_annotation$start_breakpoint[i3] <- paste(end_gene_small, start_gene_block3, sep = "_")
     }
