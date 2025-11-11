@@ -1,17 +1,17 @@
 
 TO DO LIST:
 
-1) check if we can get an estimate of the direction using busco genes
-2) if 1) is good better then check how results vary from one window to the next
-3) make plots looking at frequency of each breakpoint
-4) look also how frequently when there is an inversion it contains ivory
-5) start thinking of the real permutation approach
+1) check if we can get an estimate of the direction using busco genes (done)
+2) if 1) is good better then check how results vary from one window to the next (done)
+3) make plots looking at frequency of each breakpoint (done)
+4) look also how frequently when there is an inversion it contains ivory (done)
+5) start thinking of the real permutation approach (NOT DONE)
 
 future potential refinement:
-2) solve nested translocations
+2) solve nested translocations (NOT DONE)
 
-3) near breakpoint scan and fix? (backward check)
+3) near breakpoint scan and fix? (backward check; NOT DONE)
 
-4) fix end translocation due to noise
+4) fix end translocation due to noise ((NOT DONE)
 
-5) how to handle structural variants identified but with double undefined breakpoints?
+5) how to handle structural variants identified but with double undefined breakpoints? (done)
