@@ -8,10 +8,10 @@ TO DO LIST:
 5) start thinking of the real permutation approach (NOT DONE)
 
 future potential refinement:
-2) solve nested translocations (NOT DONE)
+2) solve nested translocations (DONE)
 
 3) near breakpoint scan and fix? (backward check; NOT DONE)
 
-4) fix end translocation due to noise ((NOT DONE)
+4) fix end translocation due to noise ((DONE)
 
 5) how to handle structural variants identified but with double undefined breakpoints? (done)
