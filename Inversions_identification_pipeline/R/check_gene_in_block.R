@@ -46,7 +46,7 @@ check_gene_in_block <- function(block_data,
   target_idx <- gene_pos[[gene_name]]
   
   # roles that count as inversions
-  allowed_roles <- c("inversion","translocation","inversion+translocation")
+  allowed_roles <- c("inversion", "inversion+translocation", "translocation")
   inv_rows <- block_data[role %in% allowed_roles]
   
   # no inversion-like blocks -> FALSE
