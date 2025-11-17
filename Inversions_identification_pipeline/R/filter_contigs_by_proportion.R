@@ -2,7 +2,7 @@
 # Function: get the right contig
 #-------------------------------
 filter_contigs_by_proportion <- function(blast_dt, contig_col_index = 2, pos_col_index = 9,
-                                         bit_score_index = 12, threshold = 0.7, min_bit_score = 80, outlier = TRUE) {
+                                         bit_score_index = 12, threshold = 0.7, min_bit_score = 70, outlier = TRUE) {
   
   # Ensure input is a data.table
   dt <- as.data.table(blast_dt)
@@ -45,13 +45,20 @@ filter_contigs_by_proportion <- function(blast_dt, contig_col_index = 2, pos_col
   filtered_dt <- dt[dt[[contig_col_index]] %in% selected_contigs]
   
   # Call the Chaos_noise_score function on the filtered data
-  high_chaos <- dispersion_score(filtered_dt, pos_col_index = pos_col_index, chaos_excess_score = 1.7)
+  high_chaos <- dispersion_score(filtered_dt, pos_col_index = pos_col_index, chaos_excess_score = 1.4)
   
   # If chaos is too high, print message and stop
   if (high_chaos) {
     message("Detected excessive noise in blast hits. Dispersion score above threshold. Dropping this genome.")
     filtered_dt <- NULL
   }
+  
+  # If chaos is too high, print message and stop
+  if (is_big_enough(filtered_dt)==FALSE){
+    message("The scaffold is smaller than 10Mb. Dropping this genome.")
+    filtered_dt <- NULL
+  }
+  
   
   # Return filtered table
   return(filtered_dt)
