@@ -2,7 +2,7 @@
 # Function: get the right contig
 #-------------------------------
 filter_contigs_by_proportion <- function(blast_dt, contig_col_index = 2, pos_col_index = 9,
-                                         bit_score_index = 12, threshold = 0.7, min_bit_score = 70, outlier = TRUE) {
+                                         bit_score_index = 12, threshold = 0.5, min_bit_score = 70, outlier = TRUE, gene_order) {
   
   # Ensure input is a data.table
   dt <- as.data.table(blast_dt)
@@ -53,13 +53,32 @@ filter_contigs_by_proportion <- function(blast_dt, contig_col_index = 2, pos_col
     filtered_dt <- NULL
   }
   
-  # If chaos is too high, print message and stop
-  if (is_big_enough(filtered_dt)==FALSE){
-    message("The scaffold is smaller than 10Mb. Dropping this genome.")
+  # Check if there is enough genomics data (scaffold >= 1Mb)
+  if (is_big_enough(filtered_dt,threshold = 1000000)==FALSE){
+    message("The scaffold is smaller than 1Mb. Dropping this genome.")
     filtered_dt <- NULL
   }
-  
-  
+
+
+  # Check if 80% of the melpomene chromosomes 15 genes are there
+  # Read gene order and transform it into a vector
+    if (is.character(gene_order) && length(gene_order) == 1 && file.exists(gene_order)) {
+    gene_order <- data.table::fread(gene_order, header = FALSE)[[1]]
+  }
+
+  pct_genes_present <- pct_genes_in_scaffold(filtered_dt=filtered_dt, gene_order="genes_order_busco.txt")
+  if(pct_genes_present < 0.80){
+    filtered_dt <- NULL
+  }
+
+  # Make sure at least one of the first 10 and 10 last melpo genes are present
+  #if(check_start_end_melpo_genes_present(filtered_dt, 
+   # genes_set1 = gene_order[1:10],
+  #genes_set2 = gene_order[(length(gene_order) - 9):length(gene_order)],
+  #  gene_col_index=1)==FALSE){
+  #  filtered_dt <- NULL
+  #}
+
   # Return filtered table
   return(filtered_dt)
 }
