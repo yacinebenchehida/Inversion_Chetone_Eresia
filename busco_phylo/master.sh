@@ -1,17 +1,39 @@
-!/bin/bash
+#!/bin/bash
 #SBATCH --job-name=lau_bus       
-#SBATCH --partition=nodes
+#SBATCH --partition=week
 #SBATCH --ntasks=1                       
 #SBATCH --cpus-per-task=1                
 #SBATCH --mem=1gb                       
-#SBATCH --time=01:00:00                  
+#SBATCH --time=6-00:00:00            
 #SBATCH --account=BIOL-SPECGEN-2018 
 
+MAXJOBS=100   # maximum allowed concurrent jobs
+SLEEP=30      # how often to re-check
 count=0
 
-cat list_genome.txt | while read line; do
+while read line; do
     count=$((count + 1))
     echo "$count $line"
+
+    # throttle submission until you have fewer than $MAXJOBS running/pending
+    while true; do
+        # count your running or pending jobs
+        njobs=$(squeue -u "$USER" | wc -l)
+        # subtract header line
+        njobs=$((njobs - 1))
+
+        if [ "$njobs" -lt "$MAXJOBS" ]; then
+            break
+        fi
+
+        # wait before checking again
+        sleep "$SLEEP"
+    done
+
+    # submit the job
     sbatch ./busco.sh "$line"
-    sleep 30s
-done
+
+    # your existing delay
+    sleep 75s
+
+done < list_genomes.txt
