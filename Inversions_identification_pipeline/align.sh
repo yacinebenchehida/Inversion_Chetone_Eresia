@@ -56,7 +56,7 @@ for gene in "${GENES[@]}"; do
 
     # trimal alignment cleaning
     echo $gene Starting trimming
-    trimal -in "$outdir/codon.aln" -out "$outdir/trimmed_protein.aln" -gt 0.8 -st 0.001 -resoverlap 0.75 -seqoverlap 80
+    trimal -in "$outdir/codon.aln" -out "$outdir/${gene}_trimmed_protein.aln" -gt 0.8 -st 0.001 -resoverlap 0.75 -seqoverlap 80
     echo $gene Trimming done
 
     # Clean folder
