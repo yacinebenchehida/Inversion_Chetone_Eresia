@@ -1,5 +1,3 @@
-
-
 #!/usr/bin/env python3  # Use Python 3 interpreter
 
 import os               # Import for path operations
