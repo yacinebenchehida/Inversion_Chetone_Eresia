@@ -1,40 +1,75 @@
-#!/usr/bin/env python3                           # use python3 interpreter
+#!/usr/bin/env python3                                
 
-import os                                        # file system operations
-from Bio import SeqIO                            # read fasta files
-from tqdm import tqdm                             # progress bars
+import os                                            # filesystem ops
+from Bio import SeqIO                                # fasta parsing
+from tqdm import tqdm                                 # progress bars
+import re                                             # regex species extraction
 
-aligned_dir = "/mnt/scratch/projects/biol-specgen-2018/yacine/Inversions/busco_phylo/Results/alignement" # directory containing gene folders
-genes = sorted(os.listdir(aligned_dir))           # list all gene folders in sorted order
+aligned_dir = "/mnt/scratch/projects/biol-specgen-2018/yacine/Inversions/busco_phylo/Results/alignement"  # alignment dir
 
-species = set()                                   # set to collect all species names
+genes = sorted(os.listdir(aligned_dir))              # list of gene folders
 
-for g in tqdm(genes, desc="Scanning species", unit="genes"):    # loop through genes with progress bar
-    aln = f"{aligned_dir}/{g}/{g}_trimmed_protein.aln"              # path to trimmed alignment for gene g
-    if os.path.exists(aln):                                     # skip if trimmed alignment does not exist
-        for rec in SeqIO.parse(aln, "fasta"):                   # read all sequences from this alignment
-            species.add(rec.id)                                 # add species ID to set
+species = []                                         # final species list
+seen = set()                                         # track unique species
 
-species = sorted(species)                                       # sort species list for stable ordering
-supermatrix = {sp: "" for sp in species}                        # map species to their growing concatenated sequence
+# -------------------- PASS 1: extract species FROM FASTA HEADERS --------------------
+for g in tqdm(genes, desc="Scanning species"):        # loop genes
+    aln_path = f"{aligned_dir}/{g}/{g}_trimmed_protein.aln"   # alignment file path
+    if not os.path.exists(aln_path):                  # skip missing
+        continue
+    for rec in SeqIO.parse(aln_path, "fasta"):        # loop sequences
+        m = re.search(r"(GC[AF]_\d+\.\d+)", rec.id)   # extract GCA/GCF
+        if m:                                         # if match
+            sid = m.group(1)                          # clean species
+            if sid not in seen:                       # new species
+                seen.add(sid)                         # add to set
+                species.append(sid)                   # preserve order
 
-for g in tqdm(genes, desc="Concatenating", unit="genes"):       # second loop: build supermatrix
-    aln_path = f"{aligned_dir}/{g}/{g}_trimmed_protein.aln"         # path to trimmed alignment
-    if not os.path.exists(aln_path):                            # skip missing alignments
+# -------------------- CREATE TEMP FILES --------------------
+tmp_dir = "tmp_supermatrix_parts"                    # folder for partial sequences
+os.makedirs(tmp_dir, exist_ok=True)                  # create folder
+
+tmp_files = {}                                       # species -> file handle
+for sp in species:                                   # loop species
+    tmp_path = f"{tmp_dir}/{sp}.part"                # partial file path
+    tmp_files[sp] = open(tmp_path, "w")              # open file
+
+# -------------------- PASS 2: build supermatrix --------------------
+for g in tqdm(genes, desc="Concatenating genes"):     # loop genes
+    aln_path = f"{aligned_dir}/{g}/{g}_trimmed_protein.aln"   # alignment file
+    if not os.path.exists(aln_path):                  # skip missing
         continue
 
-    records = list(SeqIO.parse(aln_path, "fasta"))              # read alignment as list of SeqRecord
-    lengths = {rec.id: len(rec.seq) for rec in records}         # map species to sequence length
-    L = max(lengths.values())                                   # alignment length (max)
+    records = list(SeqIO.parse(aln_path, "fasta"))    # load alignment
+    if not records:                                   # skip empty
+        continue
 
-    seqs = {rec.id: str(rec.seq) for rec in records}            # map species to sequence string
+    L = len(records[0].seq)                           # alignment length
+    seqs = {}                                         # species -> sequence
 
-    for sp in species:                                          # iterate in fixed species order
-        if sp in seqs:                                          # species present in this alignment
-            supermatrix[sp] += seqs[sp]                         # append actual sequence
-        else:                                                   # species missing for this gene
-            supermatrix[sp] += "-" * L                          # append gap padding
+    for rec in records:                               # loop sequences
+        m = re.search(r"(GC[AF]_\d+\.\d+)", rec.id)   # extract species
+        if m:                                         # if match
+            seqs[m.group(1)] = str(rec.seq)           # store sequence
 
-with open("supermatrix.fasta", "w") as out:                     # write final concatenated supermatrix
-    for sp in species:                                          # loop species in order
-        out.write(f">{sp}\n{supermatrix[sp]}\n")                # fasta header and full concatenated sequence
+    for sp in species:                                # loop species
+        fragment = seqs.get(sp, "-" * L)              # real seq or gaps
+        tmp_files[sp].write(fragment)                 # write fragment
+
+# -------------------- CLOSE TEMP FILES --------------------
+for f in tmp_files.values():                          # loop file handles
+    f.close()                                         # close file
+
+# -------------------- MERGE INTO FINAL FASTA --------------------
+with open("supermatrix.fasta", "w") as out:           # output FASTA
+    for sp in species:                                # loop species
+        out.write(f">{sp}\n")                         # write header
+        tmp_path = f"{tmp_dir}/{sp}.part"             # partial path
+        with open(tmp_path) as tf:                    # open partial
+            out.write(tf.read() + "\n")               # write sequence
+
+# -------------------- CLEANUP --------------------
+for sp in species:                                    # loop species
+    os.remove(f"{tmp_dir}/{sp}.part")                 # delete partial
+
+os.rmdir(tmp_dir)                                    # delete tmp folder
