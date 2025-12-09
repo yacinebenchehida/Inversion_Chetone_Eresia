@@ -20,7 +20,7 @@ phylo_correction <- function(tree, inv_dt, threshold_ace = 0.9, outgroup = NULL,
   inv  <- ifelse(inv == 1, "TRUE", "FALSE")     # convert to "TRUE"/"FALSE"
   
   # ---------------------------
-  # 3. Fit Mk model & run ASR
+  # 2. Fit Mk model & run ASR
   # ---------------------------
   inv_ard <- fitMk(tree, inv, model = "ARD", pi = "fitzjohn")
   inv_ancr <- ancr(inv_ard)
@@ -34,43 +34,14 @@ phylo_correction <- function(tree, inv_dt, threshold_ace = 0.9, outgroup = NULL,
   Nnode <- tree$Nnode
   
   # ---------------------------
-  # 4. Helper functions
-  # ---------------------------
-  get_children <- function(node, tree) tree$edge[tree$edge[,1] == node, 2]
-  
-  get_descendant_tips <- function(node, tree, Ntip) {
-    kids <- get_children(node, tree)
-    tips <- kids[kids <= Ntip]
-    internals <- kids[kids > Ntip]
-    for (k in internals) tips <- c(tips, get_descendant_tips(k, tree, Ntip))
-    unique(tips)
-  }
-  
-  get_parent <- function(node, tree) {
-    idx <- which(tree$edge[,2] == node)
-    if (!length(idx)) return(NA_integer_)
-    tree$edge[idx,1]
-  }
-  
-  # Terminal monophyly check: opaque tips must be terminal (no branching)
-  is_terminal_monophyletic <- function(tips, tree, Ntip) {
-    if (length(tips) == 0) return(TRUE)
-    if (length(tips) == 1) return(TRUE)
-    mrca <- ape::getMRCA(tree, tips)
-    if (is.null(mrca) || is.na(mrca)) return(FALSE)
-    desc <- get_descendant_tips(mrca, tree, Ntip)
-    identical(sort(desc), sort(tips))
-  }
-  
-  # ---------------------------
-  # 5. Tip states & ACE
+  # 3. Tip states & ACE
   # ---------------------------
   tip_state <- inv[tree$tip.label]
   inv_col <- which(colnames(ace) == "TRUE")
   ace_inv <- ace[, inv_col]
   
   # ---------------------------
-  # 6. Sanity check
+  # 4. Sanity check
   # ---------------------------
   inv_tips_observed <- which(tip_state == "TRUE")
   internal_rows_idx <- which(ace_inv >= threshold_ace)
@@ -87,7 +58,7 @@ phylo_correction <- function(tree, inv_dt, threshold_ace = 0.9, outgroup = NULL,
   cat("===============================================\n\n")
   
   # ---------------------------
-  # 7. Candidate internal nodes (ACE >= threshold + terminal-monophyly)
+  # 5. Candidate internal nodes (ACE >= threshold + terminal-monophyly)
   # ---------------------------
   candidate_nodes <- integer(0)
   candidate_nodes_info <- list()
@@ -111,7 +82,7 @@ phylo_correction <- function(tree, inv_dt, threshold_ace = 0.9, outgroup = NULL,
   cat("Candidate internal nodes after terminal-monophyly filter: ", length(candidate_nodes), "\n")
   
   # ---------------------------
-  # 8. Basal internal nodes (most basal per cluster)
+  # 6. Basal internal nodes (most basal per cluster)
   # ---------------------------
   basal_internal <- integer(0)
   
@@ -126,7 +97,7 @@ phylo_correction <- function(tree, inv_dt, threshold_ace = 0.9, outgroup = NULL,
   cat("Basal internal nodes: ", length(basal_internal), "\n")
   
   # ---------------------------
-  # 9. Tip-only transparent units (not covered by basal nodes)
+  # 7. Tip-only transparent units (not covered by basal nodes)
   # ---------------------------
   is_tip_covered <- function(tip_idx, basal_nodes, tree, Ntip) {
     for (bn in basal_nodes) if (tip_idx %in% get_descendant_tips(bn, tree, Ntip)) return(TRUE)
@@ -139,7 +110,7 @@ phylo_correction <- function(tree, inv_dt, threshold_ace = 0.9, outgroup = NULL,
   }
   
   # ---------------------------
-  # 10. Final counts & summary
+  # 8. Final counts & summary
   # ---------------------------
   n_internal <- length(basal_internal)
   n_tiponly  <- length(basal_tip_only)
@@ -160,7 +131,7 @@ phylo_correction <- function(tree, inv_dt, threshold_ace = 0.9, outgroup = NULL,
   cat("===============================================\n\n")
   
   # ---------------------------
-  # 11. Plot ASR tree with Transparent highlights
+  # 9. Plot ASR tree with Transparent highlights
   # ---------------------------
   if(plot_tree) {
 
