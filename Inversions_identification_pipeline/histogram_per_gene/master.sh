@@ -17,4 +17,4 @@ for j in "${job_ids[@]}"; do
     dep_str="$dep_str:$j"                   # append each job ID
 done
 
-sbatch --dependency=afterok${dep_str} collect_and_plot_histo.R   # submit collector
+sbatch --dependency=afterok${dep_str} test_if_gene_in_inversion.sh   # submit collector
