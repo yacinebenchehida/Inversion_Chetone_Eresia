@@ -1,10 +1,9 @@
 #!/bin/bash
 #SBATCH --job-name=lau_bus       
-#SBATCH --partition=week
 #SBATCH --ntasks=1                       
 #SBATCH --cpus-per-task=1                
-#SBATCH --mem=1gb                       
-#SBATCH --time=6-00:00:00            
+#SBATCH --mem=5gb                       
+#SBATCH --time=1-00:00:00            
 #SBATCH --account=BIOL-SPECGEN-2018 
 
 MAXJOBS=100   # maximum allowed concurrent jobs
@@ -31,9 +30,9 @@ while read line; do
     done
 
     # submit the job
-    sbatch ./busco.sh "$line"
+    sbatch ./1_busco.sh "$line"
 
     # your existing delay
     sleep 75s
 
-done < list_genomes.txt
+done < 2bedone.txt
