@@ -24,7 +24,7 @@ for gene in "${GENES[@]}"; do
     echo "$count_genes $gene"
 
     # collect protein sequences
-    for sp in GC*; do
+    for sp in GC* Chetone Eresia Kallima; do
         if [[ -f $sp/$gene.faa ]]; then
             sed "s/>/>${sp}_/" "$sp/$gene.faa" | sed 's/:.*//' >> "$outdir/protein.faa"
         fi
@@ -32,7 +32,7 @@ for gene in "${GENES[@]}"; do
     echo $gene protein sequences extracted
 
     # collect dna sequences
-    for sp in GC*; do
+    for sp in GC* Chetone Eresia Kallima; do
         if [[ -f $sp/$gene.fna ]]; then
             sed "s/>/>${sp}_/" "$sp/$gene.fna" | sed 's/:.*//' >> "$outdir/dna.fna"
         fi
@@ -56,7 +56,7 @@ for gene in "${GENES[@]}"; do
 
     # trimal alignment cleaning
     echo $gene Starting trimming
-    trimal -in "$outdir/codon.aln" -out "$outdir/${gene}_trimmed.aln" -gt 0.8 -st 0.001 -resoverlap 0.75 -seqoverlap 80
+    trimal -in "$outdir/codon.aln" -out "$outdir/${gene}_trimmed.aln" -gt 0.9 -st 0.005 -resoverlap 0.8 -seqoverlap 80
     echo $gene Trimming done
 
     # Clean folder
