@@ -10,4 +10,4 @@
 module load Biopython/1.84-foss-2024a
 module load tqdm/4.66.5-GCCcore-13.3.0
 
-python3 ./supermatrix.py
+python3 ./4_supermatrix.py
