@@ -2,8 +2,8 @@
 #SBATCH --job-name=busco       
 #SBATCH --partition=nodes
 #SBATCH --ntasks=1                       
-#SBATCH --cpus-per-task=2                
-#SBATCH --mem=15gb                       
+#SBATCH --cpus-per-task=4                
+#SBATCH --mem=15GB                      
 #SBATCH --time=6:00:00                  
 #SBATCH --account=BIOL-SPECGEN-2018      
 
@@ -29,7 +29,7 @@ module load BUSCO/5.4.3-foss-2020b
 # 2 - RUN BUSCO #
 #################
 cd $RESULTS
-#busco -m genome -i $INPUT/$REF -o $1 --out_path $RESULTS -l lepidoptera_odb10 -c 2
+busco -m genome -i $INPUT/$REF -o $1 --out_path $RESULTS -l lepidoptera_odb10 -c 4
 
 #############################################    
 # 3 - KEEP GENES AND PROTEIN SEQUENCES ONLY #
