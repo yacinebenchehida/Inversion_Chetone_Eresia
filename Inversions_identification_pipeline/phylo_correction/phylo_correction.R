@@ -1,4 +1,4 @@
-phylo_correction <- function(tree, inv_dt, threshold_ace = 0.9, outgroup = NULL, plot_tree=FALSE, rename_acc_2_sp = NULL,) {
+phylo_correction <- function(tree, inv_dt, threshold_ace = 0.9, outgroup = NULL, plot_tree=FALSE, rename_acc_2_sp = NULL) {
   # -------------------------------------------------------------
   # 1. Prepare trait vector for this inversion
   # -------------------------------------------------------------
@@ -7,13 +7,21 @@ phylo_correction <- function(tree, inv_dt, threshold_ace = 0.9, outgroup = NULL,
   
   tree <- ape::read.tree(tree)                  # tree is a Newick file path
   
-  if (!is.null(rename_acc_2_sp)) { # Only build the rename lookup if a mapping file path was provided
-    rename_dt <- read.table(rename_acc_2_sp, sep = "\t", header = FALSE, stringsAsFactors = FALSE, quote = "", comment.char = "") # Read two-column tab-delimited mapping file
-    colnames(rename_dt) <- c("accession", "species") # Name the two columns as accession and species
-    rename_vec <- rename_dt$species # Create the replacement vector containing species names
-    names(rename_vec) <- rename_dt$accession # Name the replacement vector by accession for fast lookup
-  } # End rename map parsing block
-  
+if (!is.null(rename_acc_2_sp)) {                                      # Apply renaming only if a mapping file path is provided
+  rename_dt <- read.table(                                           # Read the accession-to-species mapping file from disk
+    rename_acc_2_sp,                                                  # Use the provided file path
+    sep = "\t",                                                       # Specify tab as the column separator
+    header = FALSE,                                                   # Indicate that the file has no header row
+    stringsAsFactors = FALSE,                                         # Prevent automatic conversion of strings to factors
+    quote = "",                                                       # Disable quote handling to avoid unintended parsing
+    comment.char = ""                                                 # Disable comment parsing to read all lines verbatim
+  )                                                                   # End read.table call
+  colnames(rename_dt) <- c("accession", "species")                    # Assign explicit column names to the mapping table
+  rename_vec <- rename_dt$species                                     # Create a character vector of species names
+  names(rename_vec) <- rename_dt$accession                            # Name the vector with accession IDs for direct lookup
+  tree$tip.label <- rename_vec[tree$tip.label]                        # Replace tree tip labels by species names using accession lookup
+  names(inv) <- rename_vec[names(inv)]                                # Replace inversion vector names to keep them aligned with the tree
+}           
   
   if (!is.null(outgroup)) {                     # drop outgroup tip(s) if provided
     outgroup_present <- intersect(outgroup, tree$tip.label)
@@ -149,7 +157,6 @@ phylo_correction <- function(tree, inv_dt, threshold_ace = 0.9, outgroup = NULL,
     node.cex <- rep(0.2, nrow(pie_data))
     node.cex[pie_data[, "TRUE"] >= threshold_ace] <- 0.5
 
-    tip_labels <- paste0(tree$tip.label, " (", tip_state, ")")
     inv_ancr$ace[inv_ancr$ace < 0] <- 0
     if (!is.null(inv_ancr$lik.anc)) {
       inv_ancr$lik.anc[inv_ancr$lik.anc < 0] <- 0
