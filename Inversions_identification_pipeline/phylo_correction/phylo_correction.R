@@ -1,4 +1,4 @@
-phylo_correction <- function(tree, inv_dt, threshold_ace = 0.9, outgroup = NULL, plot_tree=FALSE) {
+phylo_correction <- function(tree, inv_dt, threshold_ace = 0.9, outgroup = NULL, plot_tree=FALSE, rename_acc_2_sp = NULL,) {
   # -------------------------------------------------------------
   # 1. Prepare trait vector for this inversion
   # -------------------------------------------------------------
@@ -6,6 +6,14 @@ phylo_correction <- function(tree, inv_dt, threshold_ace = 0.9, outgroup = NULL,
   names(inv) <- inv_dt$GCA                      # names must be GC IDs
   
   tree <- ape::read.tree(tree)                  # tree is a Newick file path
+  
+  if (!is.null(rename_acc_2_sp)) { # Only build the rename lookup if a mapping file path was provided
+    rename_dt <- read.table(rename_acc_2_sp, sep = "\t", header = FALSE, stringsAsFactors = FALSE, quote = "", comment.char = "") # Read two-column tab-delimited mapping file
+    colnames(rename_dt) <- c("accession", "species") # Name the two columns as accession and species
+    rename_vec <- rename_dt$species # Create the replacement vector containing species names
+    names(rename_vec) <- rename_dt$accession # Name the replacement vector by accession for fast lookup
+  } # End rename map parsing block
+  
   
   if (!is.null(outgroup)) {                     # drop outgroup tip(s) if provided
     outgroup_present <- intersect(outgroup, tree$tip.label)
