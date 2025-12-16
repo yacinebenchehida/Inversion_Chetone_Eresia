@@ -7,21 +7,42 @@ phylo_correction <- function(tree, inv_dt, threshold_ace = 0.9, outgroup = NULL,
   
   tree <- ape::read.tree(tree)                  # tree is a Newick file path
   
-if (!is.null(rename_acc_2_sp)) {                                      # Apply renaming only if a mapping file path is provided
-  rename_dt <- read.table(                                           # Read the accession-to-species mapping file from disk
-    rename_acc_2_sp,                                                  # Use the provided file path
-    sep = "\t",                                                       # Specify tab as the column separator
-    header = FALSE,                                                   # Indicate that the file has no header row
-    stringsAsFactors = FALSE,                                         # Prevent automatic conversion of strings to factors
-    quote = "",                                                       # Disable quote handling to avoid unintended parsing
-    comment.char = ""                                                 # Disable comment parsing to read all lines verbatim
-  )                                                                   # End read.table call
-  colnames(rename_dt) <- c("accession", "species")                    # Assign explicit column names to the mapping table
-  rename_vec <- rename_dt$species                                     # Create a character vector of species names
-  names(rename_vec) <- rename_dt$accession                            # Name the vector with accession IDs for direct lookup
-  tree$tip.label <- rename_vec[tree$tip.label]                        # Replace tree tip labels by species names using accession lookup
-  names(inv) <- rename_vec[names(inv)]                                # Replace inversion vector names to keep them aligned with the tree
-}           
+  # -------------------------------------------------------------------------
+  # 2. Extract species name instead of GC names and root the tree if provided
+  # -------------------------------------------------------------------------
+  if (!is.null(rename_acc_2_sp)) {
+
+  rename_dt <- read.table(
+    rename_acc_2_sp,
+    sep = "\t",
+    header = FALSE,
+    stringsAsFactors = FALSE,
+    quote = "",
+    comment.char = ""
+  )
+  colnames(rename_dt) <- c("accession", "species")
+
+  ## add _1, _2, ... to duplicated species names
+  rename_dt$species_unique <- paste0(
+    rename_dt$species, "_",
+    ave(rename_dt$species, rename_dt$species, FUN = seq_along)
+  )
+
+  ## build renaming vector USING species_unique
+  rename_vec <- rename_dt$species_unique
+  names(rename_vec) <- rename_dt$accession
+
+  ## rename tree tips
+  new_labels <- rename_vec[tree$tip.label]
+  keep <- !is.na(new_labels)
+  tree <- ape::drop.tip(tree, tree$tip.label[!keep])
+  tree$tip.label <- new_labels[keep]
+
+  ## rename inversion vector
+  names(inv) <- rename_vec[names(inv)]
+  inv <- inv[!is.na(names(inv))]
+}
+  
   
   if (!is.null(outgroup)) {                     # drop outgroup tip(s) if provided
     outgroup_present <- intersect(outgroup, tree$tip.label)
@@ -36,7 +57,7 @@ if (!is.null(rename_acc_2_sp)) {                                      # Apply re
   inv  <- ifelse(inv == 1, "TRUE", "FALSE")     # convert to "TRUE"/"FALSE"
   
   # ---------------------------
-  # 2. Fit Mk model & run ASR
+  # 3. Fit Mk model & run ASR
   # ---------------------------
   inv_ard <- fitMk(tree, inv, model = "ARD", pi = "fitzjohn")
   inv_ancr <- ancr(inv_ard)
@@ -50,14 +71,43 @@ if (!is.null(rename_acc_2_sp)) {                                      # Apply re
   Nnode <- tree$Nnode
   
   # ---------------------------
-  # 3. Tip states & ACE
+  # 4. Helper functions
+  # ---------------------------
+  get_children <- function(node, tree) tree$edge[tree$edge[,1] == node, 2]
+  
+  get_descendant_tips <- function(node, tree, Ntip) {
+    kids <- get_children(node, tree)
+    tips <- kids[kids <= Ntip]
+    internals <- kids[kids > Ntip]
+    for (k in internals) tips <- c(tips, get_descendant_tips(k, tree, Ntip))
+    unique(tips)
+  }
+  
+  get_parent <- function(node, tree) {
+    idx <- which(tree$edge[,2] == node)
+    if (!length(idx)) return(NA_integer_)
+    tree$edge[idx,1]
+  }
+  
+  # Terminal monophyly check: opaque tips must be terminal (no branching)
+  is_terminal_monophyletic <- function(tips, tree, Ntip) {
+    if (length(tips) == 0) return(TRUE)
+    if (length(tips) == 1) return(TRUE)
+    mrca <- ape::getMRCA(tree, tips)
+    if (is.null(mrca) || is.na(mrca)) return(FALSE)
+    desc <- get_descendant_tips(mrca, tree, Ntip)
+    identical(sort(desc), sort(tips))
+  }
+  
+  # ---------------------------
+  # 5. Tip states & ACE
   # ---------------------------
   tip_state <- inv[tree$tip.label]
   inv_col <- which(colnames(ace) == "TRUE")
   ace_inv <- ace[, inv_col]
   
   # ---------------------------
-  # 4. Sanity check
+  # 6. Sanity check
   # ---------------------------
   inv_tips_observed <- which(tip_state == "TRUE")
   internal_rows_idx <- which(ace_inv >= threshold_ace)
@@ -74,7 +124,7 @@ if (!is.null(rename_acc_2_sp)) {                                      # Apply re
   cat("===============================================\n\n")
   
   # ---------------------------
-  # 5. Candidate internal nodes (ACE >= threshold + terminal-monophyly)
+  # 7. Candidate internal nodes (ACE >= threshold + terminal-monophyly)
   # ---------------------------
   candidate_nodes <- integer(0)
   candidate_nodes_info <- list()
@@ -98,7 +148,7 @@ if (!is.null(rename_acc_2_sp)) {                                      # Apply re
   cat("Candidate internal nodes after terminal-monophyly filter: ", length(candidate_nodes), "\n")
   
   # ---------------------------
-  # 6. Basal internal nodes (most basal per cluster)
+  # 8. Basal internal nodes (most basal per cluster)
   # ---------------------------
   basal_internal <- integer(0)
   
@@ -113,7 +163,7 @@ if (!is.null(rename_acc_2_sp)) {                                      # Apply re
   cat("Basal internal nodes: ", length(basal_internal), "\n")
   
   # ---------------------------
-  # 7. Tip-only transparent units (not covered by basal nodes)
+  # 9. Tip-only transparent units (not covered by basal nodes)
   # ---------------------------
   is_tip_covered <- function(tip_idx, basal_nodes, tree, Ntip) {
     for (bn in basal_nodes) if (tip_idx %in% get_descendant_tips(bn, tree, Ntip)) return(TRUE)
@@ -126,7 +176,7 @@ if (!is.null(rename_acc_2_sp)) {                                      # Apply re
   }
   
   # ---------------------------
-  # 8. Final counts & summary
+  # 10. Final counts & summary
   # ---------------------------
   n_internal <- length(basal_internal)
   n_tiponly  <- length(basal_tip_only)
@@ -147,7 +197,7 @@ if (!is.null(rename_acc_2_sp)) {                                      # Apply re
   cat("===============================================\n\n")
   
   # ---------------------------
-  # 9. Plot ASR tree with Transparent highlights
+  # 11. Plot ASR tree with Transparent highlights
   # ---------------------------
   if(plot_tree) {
 
@@ -157,6 +207,7 @@ if (!is.null(rename_acc_2_sp)) {                                      # Apply re
     node.cex <- rep(0.2, nrow(pie_data))
     node.cex[pie_data[, "TRUE"] >= threshold_ace] <- 0.5
 
+    tip_labels <- paste0(tree$tip.label, " (", tip_state, ")")
     inv_ancr$ace[inv_ancr$ace < 0] <- 0
     if (!is.null(inv_ancr$lik.anc)) {
       inv_ancr$lik.anc[inv_ancr$lik.anc < 0] <- 0
@@ -173,6 +224,14 @@ if (!is.null(rename_acc_2_sp)) {                                      # Apply re
       args.tiplabels=list(cex=0.1),
       legend=FALSE
     )
+    
+    mtext(
+  paste0("After phylogenetic correction: ", total_origins, " independent origins"),
+  side = 1,        # bottom margin
+  line = 3,        # distance from plot
+  cex  = 1.2
+	)
+    
     nodelabels(cex=0.4, frame="none", adj=c(1.2, -0.4))
   }
     
