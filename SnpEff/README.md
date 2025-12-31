@@ -1,4 +1,4 @@
-# This folder contains all the scripts used to SnpEff
+# This folder contains all the scripts used to run SnpEff
 
 ## Building the chetone database
 
