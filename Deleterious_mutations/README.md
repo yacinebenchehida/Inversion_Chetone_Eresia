@@ -1,5 +1,4 @@
 # Building a SnpEff Database for a New Species
-*(without CDS or protein FASTA files)*
 
 This guide describes how to build a local SnpEff database for a species that does not have `cds.fa` or `protein.fa`.
 
