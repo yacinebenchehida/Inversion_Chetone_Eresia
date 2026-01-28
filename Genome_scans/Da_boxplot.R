@@ -30,7 +30,7 @@ Eresia_full  <- Eresia
 Numata_full  <- Numata
 
 # Create truncated datasets up to gene
-Chetone_gene <- Chetone[Chetone$V1 <= gene_coords$Chetone, ]
+Chetone_gene <- Chetone[Chetone$V1 >= gene_coords$Chetone, ]
 Eresia_gene  <- Eresia[Eresia$V1 <= gene_coords$Eresia, ]
 Numata_gene  <- Numata[Numata$V1 <= gene_coords$Numata, ]
 
